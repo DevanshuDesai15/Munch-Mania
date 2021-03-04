@@ -1,2 +1,2 @@
 # Munch-Mania
-A recipe application 
+A recipe application in flutter
