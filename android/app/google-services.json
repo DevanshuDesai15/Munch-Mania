@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "279528714515",
+    "firebase_url": "https://food-recommendation-85279.firebaseio.com",
+    "project_id": "food-recommendation-85279",
+    "storage_bucket": "food-recommendation-85279.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:279528714515:android:d753a1679a54e3f3a46ae6",
+        "android_client_info": {
+          "package_name": "com.DevaSam.food_recommendation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "279528714515-0o6736e1aeu80fhn3gk59ntt00qj35vl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8rVtNMbmBetXqaCi2rFEDqil_HKSm4sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "279528714515-0o6736e1aeu80fhn3gk59ntt00qj35vl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
