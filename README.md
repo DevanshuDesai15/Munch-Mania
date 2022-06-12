@@ -1,6 +1,8 @@
 # Munch Mania
-
-<img src="https://user-images.githubusercontent.com/46750877/144615359-51caf409-f1b1-4dcb-9f86-b5545273a935.jpg" width="900" height="700">
+  Worried about your food expiry dates and how to make use of those items? This application will help solve this problem... This applications allows user to select food items according to their expiry dates and suggest user some recipies through which they can utilise food items and enjoy a delecious meal.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/46750877/173220775-1c9e46ac-3308-418a-8eb3-c460f6be2135.png" width="700" height="500">
+</p>
 
 ## Software Design
 ### Food Recipes
