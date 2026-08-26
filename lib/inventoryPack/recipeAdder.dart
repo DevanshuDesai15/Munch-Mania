@@ -1113,7 +1113,7 @@ class _recipeAdderState extends State<recipeAdder> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           InkWell(
-                            splashColor: Colors.blueAccent[100],
+                            splashColor: Colors.blueAccent.shade100,
                             child: GestureDetector(
                               onTap: () {
                                 uploadPic(context, recipenameController.text);

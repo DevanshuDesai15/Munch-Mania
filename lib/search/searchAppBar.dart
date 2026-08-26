@@ -54,7 +54,7 @@ class _searchAppBarState extends State<searchAppBar> {
     );
   }
 
-  var color = Colors.green[100];
+  var color = Colors.green.shade100;
   var colorIcon = Colors.green;
   var colorText = Colors.green;
   Widget _buildIcon(int index) {
@@ -64,7 +64,7 @@ class _searchAppBarState extends State<searchAppBar> {
         onTap: () {
           setState(() {
             _selectedIndex = index;
-            color = Colors.green[100];
+            color = Colors.green.shade100;
             colorIcon = Colors.green;
             colorText = Colors.green;
           });

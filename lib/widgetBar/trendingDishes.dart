@@ -63,7 +63,7 @@ class _trendingDishesState extends State<trendingDishes> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(40)),
-                color: Colors.red[300],
+                color: Colors.red.shade300,
                 boxShadow: [
                   new BoxShadow(
                     color: Colors.black12,
@@ -105,7 +105,7 @@ class _trendingDishesState extends State<trendingDishes> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(10),
                           bottomRight: Radius.circular(40)),
-                      color: Colors.red[300],
+                      color: Colors.red.shade300,
                       image: DecorationImage(
                         image: AssetImage("assets/food2.jpeg"),
                         fit: BoxFit.cover,
@@ -120,7 +120,7 @@ class _trendingDishesState extends State<trendingDishes> {
                           end: Alignment.centerLeft,
                           colors: [
                             Colors.white.withOpacity(0.0),
-                            Colors.red[300],
+                            Colors.red.shade300,
                           ],
                         ),
                         borderRadius: BorderRadius.only(
@@ -216,7 +216,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                         height: 120.0,
                                         width: 210.0,
                                         decoration: BoxDecoration(
-                                          color: Colors.red[200],
+                                          color: Colors.red.shade200,
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),
@@ -451,7 +451,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                         height: 120.0,
                                         width: 210.0,
                                         decoration: BoxDecoration(
-                                          color: Colors.amber[100],
+                                          color: Colors.amber.shade100,
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),

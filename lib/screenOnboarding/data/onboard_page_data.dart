@@ -4,9 +4,9 @@ import 'package:food_recommendation/screenOnboarding/model/onboard_page_model.da
 
 List<OnboardPageModel> onboardData = [
   OnboardPageModel(
-    Colors.amber[300],
+    Colors.amber.shade300,
     Colors.white,
-    Colors.amber[300],
+    Colors.amber.shade300,
     2,
     FontAwesomeIcons.utensils,
     'Food Recipes',
@@ -15,7 +15,7 @@ List<OnboardPageModel> onboardData = [
   ),
   OnboardPageModel(
     Colors.white,
-    Colors.amber[300],
+    Colors.amber.shade300,
     Colors.white,
     2,
     FontAwesomeIcons.glassMartini,
@@ -24,9 +24,9 @@ List<OnboardPageModel> onboardData = [
         'so that you can have a luxurious meal right at your home.',
   ),
   OnboardPageModel(
-    Colors.amber[300],
+    Colors.amber.shade300,
     Colors.white,
-    Colors.amber[300],
+    Colors.amber.shade300,
     3,
     FontAwesomeIcons.list,
     'Inventory Tracking',
@@ -35,8 +35,8 @@ List<OnboardPageModel> onboardData = [
   ),
   OnboardPageModel(
     Colors.white,
-    Colors.amber[300],
-    Colors.amber[300],
+    Colors.amber.shade300,
+    Colors.amber.shade300,
     4,
     FontAwesomeIcons.checkSquare,
     'Automatic Shopping List',

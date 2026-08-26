@@ -16,7 +16,7 @@ class _fullScreenImageState extends State<fullScreenImage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.amber[300],
+        backgroundColor: Colors.amber.shade300,
         title: Text(
           "Profile Picture",
           style: TextStyle(color: Colors.white),

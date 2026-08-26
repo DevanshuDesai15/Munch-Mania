@@ -105,8 +105,8 @@ class _home_screenState extends State<home_screen> {
     );
   }
 
-  var color = Colors.red[100];
-  var colorIcon = Colors.red[500];
+  var color = Colors.red.shade100;
+  var colorIcon = Colors.red.shade500;
 
   Widget _buildIcon(int index) {
     return GestureDetector(
@@ -115,25 +115,25 @@ class _home_screenState extends State<home_screen> {
           _selectedIndex = index;
           head = headingName[index];
           if (index == 0) {
-            color = Colors.red[100];
+            color = Colors.red.shade100;
             colorIcon = Colors.redAccent;
             dishAll = "allFood";
             dishType = "food";
           } else if (index == 1) {
-            color = Colors.blue[100];
+            color = Colors.blue.shade100;
             colorIcon = Colors.blueAccent;
             dishAll = "allBeverages";
             dishType = "drinks";
           } else if (index == 2) {
-            color = Colors.pink[100];
+            color = Colors.pink.shade100;
             colorIcon = Colors.pinkAccent;
             dishAll = "allDessert";
             dishType = "dessert";
           } else if (index == 3) {
-            color = Colors.amber[100];
+            color = Colors.amber.shade100;
             colorIcon = Colors.amberAccent;
           } else if (index == 4) {
-            color = Colors.green[100];
+            color = Colors.green.shade100;
             colorIcon = Colors.green;
           }
         });

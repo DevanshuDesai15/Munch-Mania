@@ -58,7 +58,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                   const EdgeInsets.only(top: 20, bottom: 20),
                               child: Icon(
                                 FontAwesomeIcons.exclamation,
-                                color: Colors.blue[100],
+                                color: Colors.blue.shade100,
                                 size: (MediaQuery.of(context).size.width) / 2,
                               ),
                             ),
@@ -68,7 +68,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   height: 2,
-                                  color: Colors.blue[100],
+                                  color: Colors.blue.shade100,
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
                                 ),

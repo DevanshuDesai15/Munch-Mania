@@ -86,7 +86,7 @@ class _profile2State extends State<profile2> {
           textAlign: TextAlign.center,
         ),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.amber[300],
+        backgroundColor: Colors.amber.shade300,
       ));
       circularProgress = false;
     });
@@ -449,7 +449,7 @@ class _profile2State extends State<profile2> {
                   child: Text("Tutorial"),
                   onPressed: () {
                     setState(() {
-                      color = Colors.amber[100];
+                      color = Colors.amber.shade100;
                     });
                     Navigator.push(
                       context,
@@ -798,7 +798,7 @@ class _profile2State extends State<profile2> {
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(30)),
-                                color: Colors.red[200],
+                                color: Colors.red.shade200,
                                 boxShadow: [
                                   new BoxShadow(
                                     color: Colors.black12.withOpacity(.05),
@@ -846,7 +846,7 @@ class _profile2State extends State<profile2> {
                                       borderRadius: BorderRadius.only(
                                           topRight: Radius.circular(10),
                                           bottomRight: Radius.circular(30)),
-                                      color: Colors.red[100],
+                                      color: Colors.red.shade100,
                                       image: DecorationImage(
                                         image: AssetImage("assets/food2.jpeg"),
                                         fit: BoxFit.cover,
@@ -861,7 +861,7 @@ class _profile2State extends State<profile2> {
                                           end: Alignment.centerLeft,
                                           colors: [
                                             Colors.white.withOpacity(0.0),
-                                            Colors.red[200],
+                                            Colors.red.shade200,
                                           ],
                                         ),
                                         borderRadius: BorderRadius.only(
@@ -897,7 +897,7 @@ class _profile2State extends State<profile2> {
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(30)),
-                                color: Colors.blue[200],
+                                color: Colors.blue.shade200,
                                 boxShadow: [
                                   new BoxShadow(
                                     color: Colors.black12.withOpacity(.05),
@@ -945,7 +945,7 @@ class _profile2State extends State<profile2> {
                                       borderRadius: BorderRadius.only(
                                           topRight: Radius.circular(10),
                                           bottomRight: Radius.circular(30)),
-                                      color: Colors.blue[100],
+                                      color: Colors.blue.shade100,
                                       image: DecorationImage(
                                         image:
                                             AssetImage("assets/bevrages.jpeg"),
@@ -961,7 +961,7 @@ class _profile2State extends State<profile2> {
                                           end: Alignment.centerLeft,
                                           colors: [
                                             Colors.white.withOpacity(0.0),
-                                            Colors.blue[200],
+                                            Colors.blue.shade200,
                                           ],
                                         ),
                                         borderRadius: BorderRadius.only(
@@ -997,7 +997,7 @@ class _profile2State extends State<profile2> {
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(30)),
-                                color: Colors.pink[100],
+                                color: Colors.pink.shade100,
                                 boxShadow: [
                                   new BoxShadow(
                                     color: Colors.black12.withOpacity(.05),
@@ -1045,7 +1045,7 @@ class _profile2State extends State<profile2> {
                                       borderRadius: BorderRadius.only(
                                           topRight: Radius.circular(10),
                                           bottomRight: Radius.circular(30)),
-                                      color: Colors.pink[100],
+                                      color: Colors.pink.shade100,
                                       image: DecorationImage(
                                         image: AssetImage("assets/desert.jpeg"),
                                         fit: BoxFit.cover,
@@ -1060,7 +1060,7 @@ class _profile2State extends State<profile2> {
                                           end: Alignment.centerLeft,
                                           colors: [
                                             Colors.white.withOpacity(0.0),
-                                            Colors.pink[100],
+                                            Colors.pink.shade100,
                                           ],
                                         ),
                                         borderRadius: BorderRadius.only(

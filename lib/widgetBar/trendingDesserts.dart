@@ -64,7 +64,7 @@ class _trendingDesertsState extends State<trendingDeserts> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(40)),
-                  color: Colors.pink[300],
+                  color: Colors.pink.shade300,
                   boxShadow: [
                     new BoxShadow(
                       color: Colors.black12,
@@ -106,7 +106,7 @@ class _trendingDesertsState extends State<trendingDeserts> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(40)),
-                        color: Colors.pink[100],
+                        color: Colors.pink.shade100,
                         image: DecorationImage(
                           image: AssetImage("assets/desert.jpeg"),
                           fit: BoxFit.cover,
@@ -121,7 +121,7 @@ class _trendingDesertsState extends State<trendingDeserts> {
                             end: Alignment.centerLeft,
                             colors: [
                               Colors.white.withOpacity(0.0),
-                              Colors.pink[300],
+                              Colors.pink.shade300,
                             ],
                           ),
                           borderRadius: BorderRadius.only(
@@ -213,7 +213,7 @@ class _trendingDesertsState extends State<trendingDeserts> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.pink[200],
+                                            color: Colors.pink.shade200,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -451,7 +451,7 @@ class _trendingDesertsState extends State<trendingDeserts> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.pink[100],
+                                            color: Colors.pink.shade100,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),

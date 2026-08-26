@@ -130,14 +130,14 @@ class _MyHomePageState extends State<inventory> {
     );
   }
 
-  var color = Colors.blue[100];
+  var color = Colors.blue.shade100;
   var colorText = Colors.blueAccent;
   Widget _buildIcon(int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedIndex = index;
-          color = Colors.blue[100];
+          color = Colors.blue.shade100;
           colorText = Colors.blueAccent;
           wantToAdd = true;
         });

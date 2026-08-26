@@ -64,7 +64,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(40)),
-                  color: Colors.blue[300],
+                  color: Colors.blue.shade300,
                   boxShadow: [
                     new BoxShadow(
                       color: Colors.black12,
@@ -106,7 +106,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(40)),
-                        color: Colors.blue[200],
+                        color: Colors.blue.shade200,
                         image: DecorationImage(
                           image: AssetImage("assets/bevrages.jpeg"),
                           fit: BoxFit.cover,
@@ -121,7 +121,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                             end: Alignment.centerLeft,
                             colors: [
                               Colors.white.withOpacity(0.0),
-                              Colors.blue[300],
+                              Colors.blue.shade300,
                             ],
                           ),
                           borderRadius: BorderRadius.only(
@@ -142,7 +142,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                   return Container(
                     child: Center(
                         child: SpinKitWave(
-                            color: Colors.blue[200],
+                            color: Colors.blue.shade200,
                             type: SpinKitWaveType.start)),
                   );
                 } else {
@@ -213,7 +213,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.blue[100],
+                                            color: Colors.blue.shade100,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -451,7 +451,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.blue[100],
+                                            color: Colors.blue.shade100,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),

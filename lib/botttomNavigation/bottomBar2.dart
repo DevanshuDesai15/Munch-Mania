@@ -6,8 +6,8 @@ import 'package:food_recommendation/botttomNavigation/profile2.dart';
 import 'package:food_recommendation/botttomNavigation/toDo.dart';
 
 var heightSize;
-var color = Colors.amber[100];
-var colorIcon = Colors.amber[500];
+var color = Colors.amber.shade100;
+var colorIcon = Colors.amber.shade500;
 
 class bottomBar2 extends StatefulWidget {
   @override
@@ -33,7 +33,7 @@ class _bottomBar2State extends State<bottomBar2> {
 
   @override
   void initState() {
-    color = Colors.amber[100];
+    color = Colors.amber.shade100;
     super.initState();
   }
 

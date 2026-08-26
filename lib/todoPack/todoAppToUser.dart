@@ -85,7 +85,7 @@ class _todoAppToUserState extends State<todoAppToUser> {
                 itemCount: snapshot.data.documents.length,
                 itemBuilder: (_, index) {
                   if (snapshot.data.documents[index].data["check"] == true) {
-                    colorBgOfCheckbox = Colors.red[100];
+                    colorBgOfCheckbox = Colors.red.shade100;
                     colorIconCheckbox = Colors.red;
                   } else {
                     colorBgOfCheckbox = Color(0xFFE7EBEE);

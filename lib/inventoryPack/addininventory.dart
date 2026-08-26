@@ -350,7 +350,7 @@ class _searchininventoryState extends State<addininventory> {
               height: 55,
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                  color: Colors.blue[100],
+                  color: Colors.blue.shade100,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12.withOpacity(.05),
@@ -446,7 +446,7 @@ class _searchininventoryState extends State<addininventory> {
                             fontFamily: 'Segoe UI',
                           ),),
                           behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.amber[300],);
+                          backgroundColor: Colors.amber.shade300,);
 
                         Scaffold.of(context).showSnackBar(snackBar);*/
                         final snackBar = SnackBar(
@@ -903,7 +903,7 @@ Widget buildResultCard(data, BuildContext context) {
                               child: GestureDetector(
                                 child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.green[100],
+                                      color: Colors.green.shade100,
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(30)),
                                     ),

@@ -66,7 +66,7 @@ class _inventoryList2State extends State<inventoryList2> {
                             padding: const EdgeInsets.only(top: 20, bottom: 20),
                             child: Icon(
                               FontAwesomeIcons.exclamation,
-                              color: Colors.blue[100],
+                              color: Colors.blue.shade100,
                               size: (MediaQuery.of(context).size.width) / 2,
                             ),
                           ),
@@ -76,7 +76,7 @@ class _inventoryList2State extends State<inventoryList2> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 height: 2,
-                                color: Colors.blue[100],
+                                color: Colors.blue.shade100,
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -102,13 +102,13 @@ class _inventoryList2State extends State<inventoryList2> {
                             0) &&
                         (snapshot.data.documents[index].data["expiringIn"] <=
                             3)) {
-                      colorsCard = Colors.red[200];
+                      colorsCard = Colors.red.shade200;
                     } else if ((snapshot
                                 .data.documents[index].data["expiringIn"] >
                             0) &&
                         (snapshot.data.documents[index].data["expiringIn"] <=
                             5)) {
-                      colorsCard = Colors.red[100];
+                      colorsCard = Colors.red.shade100;
                     } else {
                       colorsCard = Colors.white;
                     }

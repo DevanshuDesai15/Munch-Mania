@@ -14,7 +14,7 @@ class First extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 45.0,
                       fontWeight: FontWeight.bold,
-                      color: Colors.redAccent[400]),
+                      color: Colors.redAccent.shade400),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
@@ -26,7 +26,7 @@ class First extends StatelessWidget {
                       'Login',
                       style: TextStyle(fontSize: 20.0),
                     ),
-                    color: Colors.red[300],
+                    color: Colors.red.shade300,
                   ),
                 ),
                 RaisedButton(
@@ -35,7 +35,7 @@ class First extends StatelessWidget {
                     'Register',
                     style: TextStyle(fontSize: 20.0),
                   ),
-                  color: Colors.red[300],
+                  color: Colors.red.shade300,
                 )
               ],
             )));

@@ -59,7 +59,7 @@ class _onBoardPageState extends State<onBoardPage>
     Provider.of<ColorProvider>(context).color =
         widget.pageModel.nextAccentColor;
     setState(() {
-      color = Colors.amber[100];
+      color = Colors.amber.shade100;
     });
     Navigator.pushAndRemoveUntil(context,
         MaterialPageRoute(builder: (context) => bottomBar2()), (_) => false);
