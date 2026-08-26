@@ -17,13 +17,13 @@ class _inventoryList2State extends State<inventoryList2> {
   TextEditingController quantityController = new TextEditingController();
 
   Future getInventoryList() async {
-    QuerySnapshot qn = await Firestore.instance
+    QuerySnapshot qn = await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("inventory")
         .orderBy('expiringIn', descending: false)
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   @override
@@ -32,9 +32,9 @@ class _inventoryList2State extends State<inventoryList2> {
       backgroundColor: Colors.white,
       body: Container(
         child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance
+            stream: FirebaseFirestore.instance
                 .collection("users")
-                .document(userid)
+                .doc(userid)
                 .collection("inventory")
                 .orderBy('expiringIn', descending: false)
                 .snapshots(),
@@ -48,7 +48,7 @@ class _inventoryList2State extends State<inventoryList2> {
                             type: SpinKitWaveType.start)),
                   ),
                 );
-              } else if (snapshot.data.documents.length == 0) {
+              } else if (snapshot.data!.docs.length == 0) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(children: <Widget>[
@@ -64,7 +64,7 @@ class _inventoryList2State extends State<inventoryList2> {
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.only(top: 20, bottom: 20),
-                            child: Icon(
+                            child: FaIcon(
                               FontAwesomeIcons.exclamation,
                               color: Colors.blue.shade100,
                               size: (MediaQuery.of(context).size.width) / 2,
@@ -90,23 +90,23 @@ class _inventoryList2State extends State<inventoryList2> {
               } else {
                 return ListView.builder(
                   shrinkWrap: true,
-                  itemCount: snapshot.data.documents.length,
+                  itemCount: snapshot.data!.docs.length,
                   itemBuilder: (_, index) {
                     print("a");
-                    if (snapshot.data.documents[index].data["expiringIn"] ==
+                    final data = snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>;
+                    if (data["expiringIn"] ==
                             0 ||
-                        snapshot.data.documents[index].data["expiringIn"] < 0) {
+                        data["expiringIn"] < 0) {
                       colorsCard = Colors.red;
-                    } else if ((snapshot
-                                .data.documents[index].data["expiringIn"] >
+                    } else if ((data["expiringIn"] >
                             0) &&
-                        (snapshot.data.documents[index].data["expiringIn"] <=
+                        (data["expiringIn"] <=
                             3)) {
                       colorsCard = Colors.red.shade200;
-                    } else if ((snapshot
-                                .data.documents[index].data["expiringIn"] >
+                    } else if ((data["expiringIn"] >
                             0) &&
-                        (snapshot.data.documents[index].data["expiringIn"] <=
+                        (data["expiringIn"] <=
                             5)) {
                       colorsCard = Colors.red.shade100;
                     } else {
@@ -115,7 +115,7 @@ class _inventoryList2State extends State<inventoryList2> {
 
                     return Tooltip(
                       message:
-                          "${snapshot.data.documents[index].data["productName"]}",
+                          "${data["productName"]}",
                       child: Container(
                         color: Colors.white,
                         child: Padding(
@@ -152,10 +152,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     topLeft:
                                                         Radius.circular(5)),
                                                 image: DecorationImage(
-                                                  image: NetworkImage(snapshot
-                                                      .data
-                                                      .documents[index]
-                                                      .data["imageURL"]),
+                                                  image: NetworkImage(data["imageURL"]),
                                                   fit: BoxFit.cover,
                                                   alignment:
                                                       Alignment.topCenter,
@@ -198,7 +195,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 8, 0, 3),
                                                     child: Text(
-                                                      "${snapshot.data.documents[index].data["productName"][0].toUpperCase()}${snapshot.data.documents[index].data["productName"].substring(1)}",
+                                                      "${data["productName"][0].toUpperCase()}${data["productName"].substring(1)}",
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -213,7 +210,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 0, 0, 2),
                                                     child: Text(
-                                                      'Type: ${snapshot.data.documents[index].data["typeOfProduct"]}',
+                                                      'Type: ${data["typeOfProduct"]}',
                                                       style: TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
@@ -224,7 +221,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 0, 0, 5),
                                                     child: Text(
-                                                      'Expiring in ${snapshot.data.documents[index].data["expiringIn"]} days',
+                                                      'Expiring in ${data["expiringIn"]} days',
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(
@@ -279,10 +276,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                         ),
                                                       ),
                                                       Text(
-                                                        snapshot
-                                                            .data
-                                                            .documents[index]
-                                                            .data["quantity"]
+                                                        data["quantity"]
                                                             .toStringAsFixed(2),
                                                         style: TextStyle(
                                                             fontSize: 20,
@@ -291,10 +285,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                     .bold),
                                                       ),
                                                       Text(
-                                                        snapshot
-                                                            .data
-                                                            .documents[index]
-                                                            .data["unit"],
+                                                        data["unit"],
                                                         style: TextStyle(
                                                             fontSize: 10,
                                                             fontWeight:
@@ -371,7 +362,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                   height: 5),
                                                               Center(
                                                                 child: Text(
-                                                                  'Present Quantity: ${snapshot.data.documents[index].data["quantity"].toString()} ${snapshot.data.documents[index].data["unit"]}',
+                                                                  'Present Quantity: ${data["quantity"].toString()} ${data["unit"]}',
                                                                   style: TextStyle(
                                                                       fontSize:
                                                                           15,
@@ -432,7 +423,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                             .all(
                                                                         15.0),
                                                                     child:
-                                                                        new Icon(
+                                                                        new FaIcon(
                                                                       FontAwesomeIcons
                                                                           .check,
                                                                       color: Colors
@@ -442,18 +433,17 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                     ),
                                                                     onPressed:
                                                                         () {
-                                                                      Firestore
-                                                                          .instance
+                                                                      FirebaseFirestore.instance
                                                                           .collection(
                                                                               'users')
-                                                                          .document(
+                                                                          .doc(
                                                                               userid)
                                                                           .collection(
                                                                               'inventory')
-                                                                          .document(snapshot.data.documents[index].data["productName"][0].toUpperCase() +
-                                                                              snapshot.data.documents[index].data["productName"].substring(
+                                                                          .doc(data["productName"][0].toUpperCase() +
+                                                                              data["productName"].substring(
                                                                                   1))
-                                                                          .updateData({
+                                                                          .update({
                                                                         'quantity':
                                                                             int.parse(quantityController.text),
                                                                       }).catchError((err) =>
@@ -481,7 +471,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                             .all(
                                                                         15.0),
                                                                     child:
-                                                                        new Icon(
+                                                                        new FaIcon(
                                                                       FontAwesomeIcons
                                                                           .times,
                                                                       color: Colors
@@ -557,7 +547,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                             SizedBox(height: 5),
                                                             Center(
                                                               child: Text(
-                                                                'You still have ${snapshot.data.documents[index].data["quantity"].toString()} ${snapshot.data.documents[index].data["unit"]}',
+                                                                'You still have ${data["quantity"].toString()} ${data["unit"]}',
                                                                 style: TextStyle(
                                                                     fontWeight:
                                                                         FontWeight
@@ -599,7 +589,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                               .all(
                                                                           15.0),
                                                                   child:
-                                                                      new Icon(
+                                                                      new FaIcon(
                                                                     FontAwesomeIcons
                                                                         .check,
                                                                     color: Colors
@@ -608,28 +598,26 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                   ),
                                                                   onPressed:
                                                                       () {
-                                                                    Firestore
-                                                                        .instance
+                                                                    FirebaseFirestore.instance
                                                                         .collection(
                                                                             'users')
-                                                                        .document(
+                                                                        .doc(
                                                                             userid)
                                                                         .collection(
                                                                             'inventory')
-                                                                        .document(snapshot.data.documents[index].data["productName"][0].toUpperCase() +
-                                                                            snapshot.data.documents[index].data["productName"].substring(1))
+                                                                        .doc(data["productName"][0].toUpperCase() +
+                                                                            data["productName"].substring(1))
                                                                         .delete();
-                                                                    Firestore
-                                                                        .instance
+                                                                    FirebaseFirestore.instance
                                                                         .collection(
                                                                             'users')
-                                                                        .document(
+                                                                        .doc(
                                                                             userid)
                                                                         .collection(
                                                                             'PersonalDetails')
-                                                                        .document(
+                                                                        .doc(
                                                                             'Details')
-                                                                        .updateData({
+                                                                        .update({
                                                                       "countOfItems":
                                                                           FieldValue.increment(
                                                                               -1)
@@ -659,7 +647,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                               .all(
                                                                           15.0),
                                                                   child:
-                                                                      new Icon(
+                                                                      new FaIcon(
                                                                     FontAwesomeIcons
                                                                         .times,
                                                                     color: Colors

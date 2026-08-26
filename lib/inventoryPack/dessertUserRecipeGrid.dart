@@ -13,15 +13,15 @@ class dessertUserRecipeGrid extends StatefulWidget {
 
 class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
   Future getPosts() async {
-    var firestore = Firestore.instance;
+    var firestore = FirebaseFirestore.instance;
     QuerySnapshot qn = await firestore
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("HouseRecipes")
-        .document("dessert")
+        .doc("dessert")
         .collection("allDessert")
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   navigateToDetail(DocumentSnapshot post) {
@@ -46,7 +46,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                             color: Colors.lightBlueAccent,
                             type: SpinKitWaveType.start)),
                   );
-                } else if (snapshot.data.length == 0) {
+                } else if (snapshot.data!.length == 0) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(children: <Widget>[
@@ -56,7 +56,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                             Padding(
                               padding:
                                   const EdgeInsets.only(top: 20, bottom: 20),
-                              child: Icon(
+                              child: FaIcon(
                                 FontAwesomeIcons.exclamation,
                                 color: Colors.blue.shade100,
                                 size: (MediaQuery.of(context).size.width) / 2,
@@ -84,14 +84,15 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                     children: <Widget>[
                       new Expanded(
                         child: new GridView.builder(
-                            itemCount: snapshot.data.length,
+                            itemCount: snapshot.data!.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data["dish"] == "veg") {
+                              final data = snapshot.data![index].data() as Map<String, dynamic>;
+                              if (data["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data["dish"] ==
+                              } else if (data["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
@@ -100,7 +101,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                               return new Container(
                                 child: GestureDetector(
                                   onTap: () =>
-                                      navigateToDetail(snapshot.data[index]),
+                                      navigateToDetail(snapshot.data![index]),
                                   child: new GridTile(
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -127,9 +128,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                     image: DecorationImage(
                                                         fit: BoxFit.cover,
                                                         image: NetworkImage(
-                                                            snapshot.data[0]
-                                                                    .data[
-                                                                "imageURL"])),
+                                                            (snapshot.data![0].data() as Map<String, dynamic>)["imageURL"])),
                                                   ),
                                                 ),
                                                 Positioned(
@@ -233,25 +232,25 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                                             padding:
                                                                                 const EdgeInsets.all(15.0),
                                                                             child:
-                                                                                new Icon(
+                                                                                new FaIcon(
                                                                               FontAwesomeIcons.check,
                                                                               color: Colors.white,
                                                                               size: 25.0,
                                                                             ),
                                                                             onPressed:
                                                                                 () {
-                                                                              FirebaseStorage.instance.ref().child("houseRecipes").child(userid).child(snapshot.data[index].data["name"] + ".jpg").delete();
-                                                                              Firestore.instance.collection("users").document(userid).collection("HouseRecipes").document("dessert").collection("allDessert").document(snapshot.data[index].data["Name"]).delete();
+                                                                              FirebaseStorage.instance.ref().child("houseRecipes").child(userid).child(data["name"] + ".jpg").delete();
+                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("HouseRecipes").doc("dessert").collection("allDessert").doc(data["Name"]).delete();
                                                                               setState(() {
                                                                                 getPosts();
                                                                               });
-                                                                              Firestore.instance.collection("users").document(userid).collection("PersonalDetails").document("Details").updateData({
+                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("PersonalDetails").doc("Details").update({
                                                                                 "recipeUploaded": FieldValue.increment(-1),
                                                                               });
                                                                               Navigator.pop(context);
                                                                               /*Flushbar(
                                                                                 backgroundColor: Colors.redAccent,
-                                                                                message: 'Removed "${snapshot.data[index].data["name"]}" from your Recipe List',
+                                                                                message: 'Removed "${data["name"]}" from your Recipe List',
                                                                                 duration: Duration(seconds: 2),
                                                                               )..show(context);*/
                                                                             },
@@ -266,7 +265,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                                             padding:
                                                                                 const EdgeInsets.all(15.0),
                                                                             child:
-                                                                                new Icon(
+                                                                                new FaIcon(
                                                                               FontAwesomeIcons.times,
                                                                               color: Colors.white,
                                                                               size: 25.0,
@@ -296,8 +295,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                             .start,
                                                     children: <Widget>[
                                                       Text(
-                                                        snapshot.data[index]
-                                                            .data["name"],
+                                                        data["name"],
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 24.0,
@@ -308,7 +306,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                       ),
                                                       Row(
                                                         children: <Widget>[
-                                                          Icon(
+                                                          FaIcon(
                                                             FontAwesomeIcons
                                                                 .caretRight,
                                                             size: 20.0,
@@ -316,8 +314,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                                           ),
                                                           SizedBox(width: 2.0),
                                                           Text(
-                                                            snapshot.data[index]
-                                                                    .data[
+                                                            data[
                                                                 "cuisine"],
                                                             style: TextStyle(
                                                               color:
@@ -337,7 +334,7 @@ class _dessertUserRecipeGridState extends State<dessertUserRecipeGrid> {
                                     ),
                                   ),
                                 ),
-                                //title: Text(snapshot.data[index].data["productName"]),
+                                //title: Text(data["productName"]),
                               );
                             }),
                       ),

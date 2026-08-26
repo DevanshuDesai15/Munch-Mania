@@ -30,8 +30,8 @@ class _searchininventoryState extends State<addininventory> {
     'Bakery',
     'Branded'
   ];
-  String _selectedLocation1;
-  String _selectedLocation;
+  String? _selectedLocation1;
+  String? _selectedLocation;
 
   var queryResultSet = [];
   var tempSearchStore = [];
@@ -47,8 +47,8 @@ class _searchininventoryState extends State<addininventory> {
         value.substring(0, 1).toUpperCase() + value.substring(1);
     if ((queryResultSet.length == 0 && value.length == 1)) {
       SearchService().searchByName(value).then((QuerySnapshot docs) {
-        for (int i = 0; i < docs.documents.length; ++i) {
-          queryResultSet.add(docs.documents[i].data);
+        for (int i = 0; i < docs.docs.length; ++i) {
+          queryResultSet.add(docs.docs[i].data() as Map<String, dynamic>);
         }
       });
     } else {
@@ -74,18 +74,18 @@ class _searchininventoryState extends State<addininventory> {
       setState(() {
         tempSearchStore = [];
       });
-      for (int i = 0; i < docs.documents.length; ++i) {
-        print(docs.documents[i].data["productName"]);
-        tempSearchStore.add(docs.documents[i].data);
+      for (int i = 0; i < docs.docs.length; ++i) {
+        print((docs.docs[i].data() as Map<String, dynamic>)["productName"]);
+        tempSearchStore.add(docs.docs[i].data() as Map<String, dynamic>);
       }
     });
     SearchService().searchByButtonType(value2).then((QuerySnapshot docs) {
       setState(() {
         tempSearchStore = tempSearchStore;
       });
-      for (int i = 0; i < docs.documents.length; ++i) {
-        print(docs.documents[i].data["productName"]);
-        tempSearchStore.add(docs.documents[i].data);
+      for (int i = 0; i < docs.docs.length; ++i) {
+        print((docs.docs[i].data() as Map<String, dynamic>)["productName"]);
+        tempSearchStore.add(docs.docs[i].data() as Map<String, dynamic>);
       }
     });
   }
@@ -157,7 +157,7 @@ class _searchininventoryState extends State<addininventory> {
                                               BorderRadius.circular(32.0)),
                                     ),
                                     validator: (value) {
-                                      if (value.isEmpty) {
+                                      if (value == null || value.isEmpty) {
                                         return "Please enter the product name";
                                       } else {
                                         return null;
@@ -199,7 +199,7 @@ class _searchininventoryState extends State<addininventory> {
                                             value: _selectedLocation,
                                             hint: Text("Type of Product"),
                                             isDense: true,
-                                            onChanged: (String newValue) {
+                                            onChanged: (String? newValue) {
                                               setState(() {
                                                 _selectedLocation = newValue;
                                                 state.didChange(newValue);
@@ -236,7 +236,7 @@ class _searchininventoryState extends State<addininventory> {
                                             value: _selectedLocation1,
                                             hint: Text("Units"),
                                             isDense: true,
-                                            onChanged: (String newValue) {
+                                            onChanged: (String? newValue) {
                                               setState(() {
                                                 _selectedLocation1 = newValue;
                                                 state.didChange(newValue);
@@ -264,23 +264,27 @@ class _searchininventoryState extends State<addininventory> {
                                       children: <Widget>[
                                         RawMaterialButton(
                                           onPressed: () {
-                                            if (_formKey.currentState
+                                            if (_formKey.currentState!
                                                 .validate()) {
-                                              if (_selectedLocation1
+                                              if (_selectedLocation1 !=
+                                                      null &&
+                                                  _selectedLocation1!
                                                       .isNotEmpty &&
-                                                  _selectedLocation
+                                                  _selectedLocation !=
+                                                      null &&
+                                                  _selectedLocation!
                                                       .isNotEmpty) {
-                                                Firestore.instance
+                                                FirebaseFirestore.instance
                                                     .collection("admin")
-                                                    .document(
+                                                    .doc(
                                                         "inventoryRequest")
                                                     .collection(userid)
-                                                    .document((productController
+                                                    .doc((productController
                                                                 .text)[0]
                                                             .toUpperCase() +
                                                         (productController.text)
                                                             .substring(1))
-                                                    .setData({
+                                                    .set({
                                                   'expiry': int.parse(
                                                       expiryController.text),
                                                   'productName':
@@ -306,7 +310,7 @@ class _searchininventoryState extends State<addininventory> {
                                               }
                                             }
                                           },
-                                          child: new Icon(
+                                          child: new FaIcon(
                                             FontAwesomeIcons.check,
                                             color: Colors.white,
                                             size: 25.0,
@@ -324,7 +328,7 @@ class _searchininventoryState extends State<addininventory> {
                                             _selectedLocation1 = null;
                                             Navigator.pop(context);
                                           },
-                                          child: new Icon(
+                                          child: new FaIcon(
                                             FontAwesomeIcons.times,
                                             color: Colors.white,
                                             size: 25.0,
@@ -448,7 +452,7 @@ class _searchininventoryState extends State<addininventory> {
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.amber.shade300,);
 
-                        Scaffold.of(context).showSnackBar(snackBar);*/
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);*/
                         final snackBar = SnackBar(
                           duration: Duration(milliseconds: 1500),
                           content: Text(
@@ -462,7 +466,7 @@ class _searchininventoryState extends State<addininventory> {
                           ),
                           backgroundColor: Colors.blueAccent,
                         );
-                        Scaffold.of(context).showSnackBar(snackBar);
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     }),
               ],
@@ -495,9 +499,9 @@ Widget buildResultCard(data, BuildContext context) {
   imageurll = data['imageURL'].toString();
   var col = Colors.grey;
 
-  DateTime selectedDate;
-  Future<Null> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+  DateTime? selectedDate;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(DateTime.now().year - 3),
@@ -572,7 +576,7 @@ Widget buildResultCard(data, BuildContext context) {
                             ),
                             Row(
                               children: <Widget>[
-                                Icon(
+                                FaIcon(
                                   FontAwesomeIcons.caretRight,
                                   size: 17.0,
                                   color: Colors.white,
@@ -589,7 +593,7 @@ Widget buildResultCard(data, BuildContext context) {
                             ),
                             Row(
                               children: <Widget>[
-                                Icon(
+                                FaIcon(
                                   FontAwesomeIcons.caretRight,
                                   size: 17.0,
                                   color: Colors.white,
@@ -715,7 +719,7 @@ Widget buildResultCard(data, BuildContext context) {
                                           BorderRadius.circular(32.0)),
                                 ),
                                 validator: (value) {
-                                  if (value.isEmpty) {
+                                  if (value == null || value.isEmpty) {
                                     return "Enter a quantity.";
                                   } else if (int.parse(
                                           quantityController.text) <=
@@ -736,16 +740,16 @@ Widget buildResultCard(data, BuildContext context) {
                                 children: <Widget>[
                                   RawMaterialButton(
                                     onPressed: () {
-                                      if (_formKey.currentState.validate()) {
-                                        Firestore.instance
+                                      if (_formKey.currentState!.validate()) {
+                                        FirebaseFirestore.instance
                                             .collection("users")
-                                            .document(userid)
+                                            .doc(userid)
                                             .collection("inventory")
-                                            .document(data['productName'][0]
+                                            .doc(data['productName'][0]
                                                     .toUpperCase() +
                                                 data['productName']
                                                     .substring(1))
-                                            .setData({
+                                            .set({
                                           'productName': data['productName'][0]
                                                   .toLowerCase() +
                                               data['productName'].substring(1),
@@ -766,19 +770,19 @@ Widget buildResultCard(data, BuildContext context) {
                                           'expiringIn':
                                               int.parse(expiryController.text),
                                         });
-                                        Firestore.instance
+                                        FirebaseFirestore.instance
                                             .collection("users")
-                                            .document(userid)
+                                            .doc(userid)
                                             .collection("PersonalDetails")
-                                            .document("Details")
-                                            .updateData({
+                                            .doc("Details")
+                                            .update({
                                           "countOfItems":
                                               FieldValue.increment(1)
                                         });
                                         Navigator.pop(context);
                                       }
                                     },
-                                    child: new Icon(
+                                    child: new FaIcon(
                                       FontAwesomeIcons.check,
                                       color: Colors.white,
                                       size: 25.0,
@@ -792,7 +796,7 @@ Widget buildResultCard(data, BuildContext context) {
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: new Icon(
+                                    child: new FaIcon(
                                       FontAwesomeIcons.times,
                                       color: Colors.white,
                                       size: 25.0,
@@ -993,7 +997,7 @@ Widget buildResultCard(data, BuildContext context) {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .check,
                                                               color: Colors
@@ -1014,14 +1018,14 @@ Widget buildResultCard(data, BuildContext context) {
                                             );
                                           });
                                     }
-                                    Firestore.instance
+                                    FirebaseFirestore.instance
                                         .collection("users")
-                                        .document(userid)
+                                        .doc(userid)
                                         .collection("inventory")
-                                        .document(data['productName'][0]
+                                        .doc(data['productName'][0]
                                                 .toUpperCase() +
                                             data['productName'].substring(1))
-                                        .setData({
+                                        .set({
                                       'productName':
                                           data['productName'][0].toLowerCase() +
                                               data['productName'].substring(1),
@@ -1034,28 +1038,28 @@ Widget buildResultCard(data, BuildContext context) {
                                       'unit': data['unit'],
                                       //'timestampOfDateAdded':DateTime.now(),
                                       //'presentDate':DateTime.now(),
-                                      'expiringOn': selectedDate.add(
+                                      'expiringOn': selectedDate!.add(
                                           new Duration(
                                               days: int.parse(
                                                   expiryController.text))),
-                                      'expiringIn': selectedDate
+                                      'expiringIn': selectedDate!
                                           .add(new Duration(
                                               days: int.parse(
                                                   expiryController.text)))
                                           .difference(DateTime.now())
                                           .inDays,
                                     });
-                                    Firestore.instance
+                                    FirebaseFirestore.instance
                                         .collection("users")
-                                        .document(userid)
+                                        .doc(userid)
                                         .collection("PersonalDetails")
-                                        .document("Details")
-                                        .updateData({
+                                        .doc("Details")
+                                        .update({
                                       "countOfItems": FieldValue.increment(1)
                                     });
                                     Navigator.pop(context);
                                   },
-                                  child: new Icon(
+                                  child: new FaIcon(
                                     FontAwesomeIcons.check,
                                     color: Colors.white,
                                     size: 25.0,
@@ -1069,7 +1073,7 @@ Widget buildResultCard(data, BuildContext context) {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: new Icon(
+                                  child: new FaIcon(
                                     FontAwesomeIcons.times,
                                     color: Colors.white,
                                     size: 25.0,
