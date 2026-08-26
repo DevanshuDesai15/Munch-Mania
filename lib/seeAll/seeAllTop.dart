@@ -60,7 +60,7 @@ class _seeAllTopState extends State<seeAllTop> {
     if (querySnapshot.docs.length < _per_page) {
       _moreProductsAvailable = false;
     }
-    _lastDocument = querySnapshot.docs[querySnapshot.docs.length];
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     _products.addAll(querySnapshot.docs);
     setState(() {
       _gettingMoreProducts = false;
