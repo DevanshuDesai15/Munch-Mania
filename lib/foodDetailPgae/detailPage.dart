@@ -9,7 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 class detailPage extends StatefulWidget {
   final DocumentSnapshot post;
-  detailPage({this.post});
+  detailPage({required this.post});
 
   @override
   _detailPageState createState() => _detailPageState();
@@ -17,7 +17,7 @@ class detailPage extends StatefulWidget {
 
 class _detailPageState extends State<detailPage> {
   List<int> _numberList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  int _selectedLocation;
+  int? _selectedLocation;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController servingsController = new TextEditingController();
@@ -28,20 +28,21 @@ class _detailPageState extends State<detailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.post.data["dish"] == "veg") {
+    final data = widget.post.data() as Map<String, dynamic>;
+    if (data["dish"] == "veg") {
       dishColor = Colors.green;
-    } else if (widget.post.data["dish"] == "non-veg") {
+    } else if (data["dish"] == "non-veg") {
       dishColor = Colors.red;
     } else {
       dishColor = Colors.green;
     }
-    if (widget.post.data["type"] == "food") {
+    if (data["type"] == "food") {
       dishIcon = FontAwesomeIcons.utensils;
       iconColor = Colors.redAccent;
-    } else if (widget.post.data["type"] == "beverage") {
+    } else if (data["type"] == "beverage") {
       dishIcon = FontAwesomeIcons.glassMartini;
       iconColor = Colors.blueAccent;
-    } else if (widget.post.data["type"] == "dessert") {
+    } else if (data["type"] == "dessert") {
       dishIcon = FontAwesomeIcons.iceCream;
       iconColor = Colors.pink;
     } else {
@@ -49,13 +50,13 @@ class _detailPageState extends State<detailPage> {
       iconColor = Colors.amber;
     }
 
-    String stepsNew = widget.post.data["stepsNew"];
+    String stepsNew = data["stepsNew"];
     var stepsNewArr = stepsNew.split(' # ');
 
-    String IngredientStepsNew = widget.post.data["IngredientStepsNew"];
+    String IngredientStepsNew = data["IngredientStepsNew"];
     var IngredientStepsNewArr = IngredientStepsNew.split(' # ');
 
-    //String unitNew=widget.post.data["unitNew"];
+    //String unitNew=data["unitNew"];
     //var unitNewArr=unitNew.split(' # ');
 
     return Scaffold(
@@ -101,14 +102,14 @@ class _detailPageState extends State<detailPage> {
                             image: DecorationImage(
                                 fit: BoxFit.cover,
                                 image:
-                                    NetworkImage(widget.post.data["imageURL"])),
+                                    NetworkImage(data["imageURL"])),
                           ),
                         ),
                       ],
                     ),
                   ),
                   Tooltip(
-                    message: "${widget.post.data["Name"]}",
+                    message: "${data["Name"]}",
                     child: Container(
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -162,7 +163,7 @@ class _detailPageState extends State<detailPage> {
                                                     .width /
                                                 2.3,
                                             child: Text(
-                                              widget.post.data["name"],
+                                              data["name"],
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 2,
                                               textAlign: TextAlign.center,
@@ -172,13 +173,13 @@ class _detailPageState extends State<detailPage> {
                                             ),
                                           ),
                                           Text(
-                                            widget.post.data["cuisine"],
+                                            data["cuisine"],
                                             style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w300),
                                           ),
                                           Text(
-                                            "Servings: ${widget.post.data["servings"]}",
+                                            "Servings: ${data["servings"]}",
                                             style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w300),
@@ -305,7 +306,7 @@ class _detailPageState extends State<detailPage> {
                                                 value: _selectedLocation,
                                                 hint: Text("Servings"),
                                                 isDense: true,
-                                                onChanged: (int newValue) {
+                                                onChanged: (int? newValue) {
                                                   setState(() {
                                                     _selectedLocation =
                                                         newValue;
@@ -338,61 +339,54 @@ class _detailPageState extends State<detailPage> {
                                           elevation: 4.0,
                                           fillColor: Colors.lightBlueAccent,
                                           padding: const EdgeInsets.all(15.0),
-                                          child: new Icon(
+                                          child: new FaIcon(
                                             FontAwesomeIcons.check,
                                             color: Colors.white,
                                             size: 25.0,
                                           ),
                                           onPressed: () {
-                                            if (_formKey.currentState
+                                            if (_formKey.currentState!
                                                 .validate()) {
                                               for (int i = 0;
                                                   i <
-                                                      widget
-                                                          .post
-                                                          .data["Ingredients"]
+                                                      (data["Ingredients"]
+                                                              as List)
                                                           .length;
                                                   i++) {
-                                                Firestore.instance
+                                                FirebaseFirestore.instance
                                                     .collection("users")
-                                                    .document(userid)
+                                                    .doc(userid)
                                                     .collection("inventory")
-                                                    .document(widget
-                                                            .post
-                                                            .data["Ingredients"]
-                                                                [i][0]
+                                                    .doc(data["Ingredients"]
+                                                            [i][0]
                                                             .toUpperCase() +
-                                                        widget
-                                                            .post
-                                                            .data["Ingredients"]
-                                                                [i]
+                                                        data["Ingredients"][i]
                                                             .substring(1))
-                                                    .updateData({
+                                                    .update({
                                                   "quantity": FieldValue
-                                                      .increment(-((widget.post
-                                                                          .data[
+                                                      .increment(-((data[
                                                                       "IngredientsQuantity"]
                                                                   [i] /
-                                                              widget.post.data[
+                                                              data[
                                                                   "serving"]) *
-                                                          _selectedLocation))
+                                                          _selectedLocation!))
                                                 });
                                                 servingsController.clear();
                                               }
 
-                                              Firestore.instance
+                                              FirebaseFirestore.instance
                                                   .collection("users")
-                                                  .document(userid)
+                                                  .doc(userid)
                                                   .collection("cart")
-                                                  .document(
-                                                      widget.post.data["name"])
+                                                  .doc(
+                                                      data["name"])
                                                   .delete();
-                                              Firestore.instance
+                                              FirebaseFirestore.instance
                                                   .collection("users")
-                                                  .document(userid)
+                                                  .doc(userid)
                                                   .collection("PersonalDetails")
-                                                  .document("Details")
-                                                  .updateData({
+                                                  .doc("Details")
+                                                  .update({
                                                 "recipeUsed":
                                                     FieldValue.increment(1)
                                               });
@@ -416,7 +410,7 @@ class _detailPageState extends State<detailPage> {
                                           elevation: 4.0,
                                           fillColor: Colors.redAccent,
                                           padding: const EdgeInsets.all(15.0),
-                                          child: new Icon(
+                                          child: new FaIcon(
                                             FontAwesomeIcons.times,
                                             color: Colors.white,
                                             size: 25.0,
@@ -471,7 +465,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(widget.post.data["PreparationTime"].toString(),
+                        Text(data["PreparationTime"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -495,7 +489,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(widget.post.data["readyTime"].toString(),
+                        Text(data["readyTime"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -519,7 +513,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(widget.post.data["Ingredients"].length.toString(),
+                        Text(data["Ingredients"].length.toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -550,7 +544,7 @@ class _detailPageState extends State<detailPage> {
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20),
               child: Text(
-                widget.post.data["description"],
+                data["description"],
                 style: TextStyle(
                     fontWeight: FontWeight.w400, fontSize: 15, height: 1.5),
               ),
@@ -570,7 +564,7 @@ class _detailPageState extends State<detailPage> {
                 height: 50,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: widget.post.data["Ingredients"].length,
+                  itemCount: data["Ingredients"].length,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8, top: 2),
@@ -588,8 +582,8 @@ class _detailPageState extends State<detailPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text(
-                                  "${widget.post.data["Ingredients"][index][0].toUpperCase()}"
-                                  "${widget.post.data["Ingredients"][index].substring(1)}")),
+                                  "${data["Ingredients"][index][0].toUpperCase()}"
+                                  "${data["Ingredients"][index].substring(1)}")),
                         ),
                       ),
                     );
@@ -638,7 +632,7 @@ class _detailPageState extends State<detailPage> {
               child: Text("Ingredient Quantities",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 25),),
             ),
             Column(
-              children: List.generate(widget.post.data["Ingredients"].length,(i){
+              children: List.generate(data["Ingredients"].length,(i){
                 return Padding(
                   padding: const EdgeInsets.only(top: 8,right: 20,left:20),
                   child: Row(
@@ -657,17 +651,17 @@ class _detailPageState extends State<detailPage> {
                           child:new RichText(
                             text: TextSpan(
                               children: <TextSpan>[
-                                TextSpan(text:"${widget.post.data["Ingredients"][i][0].toUpperCase()}""${widget.post.data["Ingredients"][i].substring(1)}",
+                                TextSpan(text:"${data["Ingredients"][i][0].toUpperCase()}""${data["Ingredients"][i].substring(1)}",
                                     style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15,color: Colors.black)),
                                 TextSpan(text: " : ",
                                     style: TextStyle(color: Colors.black)),
-                                TextSpan(text: "${widget.post.data["IngredientQuantity"][i]}",
+                                TextSpan(text: "${data["IngredientQuantity"][i]}",
                                     style: TextStyle(color: Colors.black,fontSize: 15)),
                                 TextSpan(text: " ${unitNewArr[i]}",
                                     style: TextStyle(color: Colors.black,fontSize: 15)),
                               ],
                             ),
-                          ), //Text("${widget.post.data["Ingredients"][i][0].toUpperCase()}""${widget.post.data["Ingredients"][i].substring(1)} : ${widget.post.data["IngredientQuantity"][i]} grams/ml"),
+                          ), //Text("${data["Ingredients"][i][0].toUpperCase()}""${data["Ingredients"][i].substring(1)} : ${data["IngredientQuantity"][i]} grams/ml"),
                         ),
                       ),
                       new Spacer()
