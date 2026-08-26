@@ -3,19 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SearchService {
   searchByName(String searchField) {
-    return Firestore.instance
+    return FirebaseFirestore.instance
         .collection('products')
         .where('searchKey',
             isEqualTo: searchField.substring(0, 1).toUpperCase())
-        .getDocuments();
+        .get();
   }
 
   searchByButtonName(List searchField) {
     print(searchField);
-    return Firestore.instance
+    return FirebaseFirestore.instance
         .collection('products')
         .where('searchCriteria', arrayContainsAny: searchField)
-        .getDocuments();
+        .get();
   }
 
   searchByButtonType(String searchField) {
@@ -47,9 +47,9 @@ class SearchService {
       searchField = "Dairy";
     }
     print(searchField);
-    return Firestore.instance
+    return FirebaseFirestore.instance
         .collection('products')
         .where('typeOfProduct', isEqualTo: searchField)
-        .getDocuments();
+        .get();
   }
 }

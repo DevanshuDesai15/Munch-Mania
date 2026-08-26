@@ -12,7 +12,7 @@ class searchAppBar extends StatefulWidget {
 int _selectedIndex = 0;
 
 class _searchAppBarState extends State<searchAppBar> {
-  List<IconData> _icons = [
+  List<FaIconData> _icons = [
     FontAwesomeIcons.utensils,
     FontAwesomeIcons.glassMartini,
     FontAwesomeIcons.iceCream,
@@ -77,7 +77,7 @@ class _searchAppBarState extends State<searchAppBar> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: <Widget>[
-                Icon(
+                FaIcon(
                   _icons[index],
                   size: 20.0,
                   color:

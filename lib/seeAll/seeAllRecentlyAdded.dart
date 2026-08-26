@@ -11,17 +11,17 @@ class seeAllRecentlyAdded extends StatefulWidget {
 }
 
 class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
-  var firestore = Firestore.instance
+  var firestore = FirebaseFirestore.instance
       .collection("recipes")
-      .document(dishType)
-      .collection(dishAll);
-  Future _recentlyAddedData;
+      .doc(dishType)
+      .collection(dishAll!);
+  late Future _recentlyAddedData;
   Future getNewData() async {
     QuerySnapshot qn = await firestore
         .orderBy("timeStampOfDateCreated", descending: true)
         .limit(10)
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   @override
@@ -112,16 +112,16 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data["dish"] == "veg") {
+                              if (snapshot.data[index].data()["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data["dish"] ==
+                              } else if (snapshot.data[index].data()["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
                                 color = Colors.green;
                               }
                               return Tooltip(
-                                message: snapshot.data[index].data["name"],
+                                message: snapshot.data[index].data()["name"],
                                 child: new Container(
                                   child: GestureDetector(
                                     onTap: () =>
@@ -158,7 +158,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                               20.0),
                                                       child: Image.network(
                                                         snapshot.data[index]
-                                                            .data["imageURL"],
+                                                            .data()["imageURL"],
                                                         fit: BoxFit.cover,
                                                       ),
                                                     ),
@@ -196,7 +196,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                       children: <Widget>[
                                                         Text(
                                                           snapshot.data[index]
-                                                              .data["name"],
+                                                              .data()["name"],
                                                           style: TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 24.0,
@@ -207,7 +207,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                         ),
                                                         Row(
                                                           children: <Widget>[
-                                                            Icon(
+                                                            FaIcon(
                                                               FontAwesomeIcons
                                                                   .caretRight,
                                                               size: 20.0,
@@ -219,7 +219,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                             Text(
                                                               snapshot
                                                                   .data[index]
-                                                                  .data["name"],
+                                                                  .data()["name"],
                                                               style: TextStyle(
                                                                 color: Colors
                                                                     .white,
@@ -238,7 +238,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                       ),
                                     ),
                                   ),
-                                  //title: Text(snapshot.data[index].data["productName"]),
+                                  //title: Text(snapshot.data[index].data()["productName"]),
                                 ),
                               );
                             }),

@@ -3,12 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SearchServiceForBeverages {
   searchByName(String searchField) {
-    return Firestore.instance
+    return FirebaseFirestore.instance
         .collection('recipes')
-        .document("drinks")
+        .doc("drinks")
         .collection("allBeverages")
         .where('searchKey',
             isEqualTo: searchField.substring(0, 1).toUpperCase())
-        .getDocuments();
+        .get();
   }
 }
