@@ -42,12 +42,12 @@ class _fullScreenImageState extends State<fullScreenImage> {
                         .child("UserProfilePhoto")
                         .child(userid + ".jpg")
                         .delete();
-                    Firestore.instance
+                    FirebaseFirestore.instance
                         .collection("users")
-                        .document(userid)
+                        .doc(userid)
                         .collection("PersonalDetails")
-                        .document("Details")
-                        .updateData({
+                        .doc("Details")
+                        .update({
                       'imageURL': "",
                     });
                   });

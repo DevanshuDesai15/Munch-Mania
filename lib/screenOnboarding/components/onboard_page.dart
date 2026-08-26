@@ -11,7 +11,7 @@ class onBoardPage extends StatefulWidget {
   final OnboardPageModel pageModel;
 
   const onBoardPage(
-      {Key key, @required this.pageModel, @required this.pageController})
+      {Key? key, required this.pageModel, required this.pageController})
       : super(key: key);
 
   @override
@@ -20,9 +20,9 @@ class onBoardPage extends StatefulWidget {
 
 class _onBoardPageState extends State<onBoardPage>
     with SingleTickerProviderStateMixin {
-  AnimationController animationController;
-  Animation<double> heroAnimation;
-  Animation<double> borderAnimation;
+  late AnimationController animationController;
+  late Animation<double> heroAnimation;
+  late Animation<double> borderAnimation;
 
   @override
   void initState() {

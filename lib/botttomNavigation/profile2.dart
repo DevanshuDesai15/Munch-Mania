@@ -17,7 +17,6 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:device_info/device_info.dart';
 
 var cacheImageUrl = "";
 var textColor = Colors.black;
@@ -32,16 +31,16 @@ class profile2 extends StatefulWidget {
 class _profile2State extends State<profile2> {
   final GlobalKey<FormState> _formHelpKey = GlobalKey<FormState>();
   List<String> _locations = ['[Feedback]', '[Complaint]'];
-  String _selectedLocation;
+  String? _selectedLocation;
   List<String> _locations1 = [
     'Regarding UI',
     'Regarding Recipes',
     'Regarding Privacy',
   ];
-  String _selectedLocation1;
+  String? _selectedLocation1;
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _formEmailKey = GlobalKey<FormState>();
-  TextEditingController passemailController;
+  late TextEditingController passemailController;
 
   @override
   void initState() {
@@ -51,7 +50,7 @@ class _profile2State extends State<profile2> {
     super.initState();
   }
 
-  File _image;
+  File? _image;
 
   @override
   Future<void> resetPassword(String email) async {
@@ -59,27 +58,30 @@ class _profile2State extends State<profile2> {
   }
 
   Future uploadPic(BuildContext context) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
     setState(() {
-      _image = image;
+      _image = File(pickedFile.path);
       print('image Path$_image');
       circularProgress = true;
     });
-    StorageReference firebaseStorageRef =
+    Reference firebaseStorageRef =
         FirebaseStorage.instance.ref().child("UserProfilePhoto");
-    StorageUploadTask uploadTask =
-        firebaseStorageRef.child(userid + ".jpg").putFile(_image);
-    var ImageUrl = await (await uploadTask.onComplete).ref.getDownloadURL();
+    UploadTask uploadTask =
+        firebaseStorageRef.child(userid + ".jpg").putFile(_image!);
+    final snapshot = await uploadTask;
+    var ImageUrl = await snapshot.ref.getDownloadURL();
     setState(() {
       print("Profile Picture uploaded");
       prof = getProfileData();
-      Firestore.instance
+      FirebaseFirestore.instance
           .collection("users")
-          .document(userid)
+          .doc(userid)
           .collection("PersonalDetails")
-          .document("Details")
-          .updateData({"imageURL": ImageUrl});
-      Scaffold.of(context).showSnackBar(SnackBar(
+          .doc("Details")
+          .update({"imageURL": ImageUrl});
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           'Profile Picture Uploaded',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -92,16 +94,15 @@ class _profile2State extends State<profile2> {
     });
   }
 
-  Future prof;
+  late Future prof;
   var fn, ln;
   Future getProfileData() async {
-    var firestore = Firestore.instance;
-    QuerySnapshot qn = await firestore
+    QuerySnapshot qn = await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("PersonalDetails")
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   @override
@@ -195,7 +196,7 @@ class _profile2State extends State<profile2> {
                                                         Text("Type of concern"),
                                                     isDense: true,
                                                     onChanged:
-                                                        (String newValue) {
+                                                        (String? newValue) {
                                                       setState(() {
                                                         _selectedLocation =
                                                             newValue;
@@ -238,7 +239,7 @@ class _profile2State extends State<profile2> {
                                                     hint: Text("Concern"),
                                                     isDense: true,
                                                     onChanged:
-                                                        (String newValue) {
+                                                        (String? newValue) {
                                                       setState(() {
                                                         _selectedLocation1 =
                                                             newValue;
@@ -268,10 +269,12 @@ class _profile2State extends State<profile2> {
                                                   RawMaterialButton(
                                                     onPressed: () {
                                                       if (_formHelpKey
-                                                          .currentState
+                                                          .currentState!
                                                           .validate()) {
-                                                        if (_selectedLocation
-                                                            .isNotEmpty) {
+                                                        if (_selectedLocation !=
+                                                                null &&
+                                                            _selectedLocation!
+                                                                .isNotEmpty) {
                                                           final Email email =
                                                               Email(
                                                             body:
@@ -291,7 +294,8 @@ class _profile2State extends State<profile2> {
                                                       }
                                                     },
                                                     child: new Icon(
-                                                      FontAwesomeIcons.check,
+                                                      FontAwesomeIcons
+                                                          .check.data,
                                                       color: Colors.white,
                                                       size: 25.0,
                                                     ),
@@ -308,7 +312,8 @@ class _profile2State extends State<profile2> {
                                                       Navigator.pop(context);
                                                     },
                                                     child: new Icon(
-                                                      FontAwesomeIcons.times,
+                                                      FontAwesomeIcons
+                                                          .xmark.data,
                                                       color: Colors.white,
                                                       size: 25.0,
                                                     ),
@@ -430,22 +435,29 @@ class _profile2State extends State<profile2> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                RaisedButton(
-                    elevation: 6,
-                    textColor: Colors.white,
-                    color: Colors.white,
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 6,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      shape: StadiumBorder(),
+                    ),
                     child: Icon(
                       Icons.info_outline,
                       color: Colors.deepOrangeAccent,
                     ),
                     onPressed: () {
                       _settingModalBottomSheet(context);
-                    },
-                    shape: StadiumBorder()),
-                RaisedButton(
-                  elevation: 6,
-                  textColor: Colors.white,
-                  color: Colors.deepOrangeAccent,
+                    }),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 6,
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.deepOrangeAccent,
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
+                  ),
                   child: Text("Tutorial"),
                   onPressed: () {
                     setState(() {
@@ -456,14 +468,16 @@ class _profile2State extends State<profile2> {
                       MaterialPageRoute(builder: (context) => home()),
                     );
                   },
-                  shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0),
-                  ),
                 ),
-                RaisedButton(
-                  elevation: 6,
-                  textColor: Colors.white,
-                  color: Colors.deepOrangeAccent,
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 6,
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.deepOrangeAccent,
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
+                  ),
                   child: Text("Reset Password"),
                   onPressed: () {
                     showDialog(
@@ -520,7 +534,8 @@ class _profile2State extends State<profile2> {
                                             children: <Widget>[
                                               RawMaterialButton(
                                                 onPressed: () {
-                                                  if (_formEmailKey.currentState
+                                                  if (_formEmailKey
+                                                      .currentState!
                                                       .validate()) {
                                                     resetPassword(
                                                         passemailController
@@ -530,7 +545,7 @@ class _profile2State extends State<profile2> {
                                                   }
                                                 },
                                                 child: new Icon(
-                                                  FontAwesomeIcons.check,
+                                                  FontAwesomeIcons.check.data,
                                                   color: Colors.white,
                                                   size: 25.0,
                                                 ),
@@ -547,7 +562,7 @@ class _profile2State extends State<profile2> {
                                                   Navigator.pop(context);
                                                 },
                                                 child: new Icon(
-                                                  FontAwesomeIcons.times,
+                                                  FontAwesomeIcons.xmark.data,
                                                   color: Colors.white,
                                                   size: 25.0,
                                                 ),
@@ -569,9 +584,6 @@ class _profile2State extends State<profile2> {
                           );
                         });
                   },
-                  shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0),
-                  ),
                 ),
               ],
             ),
@@ -589,8 +601,8 @@ class _profile2State extends State<profile2> {
                             type: SpinKitWaveType.start)),
                   );
                 } else {
-                  passemailController.text = snapshot.data[0].data["email"];
-                  cacheImageUrl = snapshot.data[0].data["imageURL"];
+                  passemailController.text = snapshot.data[0].data()["email"];
+                  cacheImageUrl = snapshot.data[0].data()["imageURL"];
                   return Container(
                     color: bgColor,
                     child: ListView(
@@ -675,8 +687,8 @@ class _profile2State extends State<profile2> {
                         SizedBox(height: 15.0),
                         Center(
                           child: Text(
-                            '${snapshot.data[0].data["displayName"][0].toUpperCase()}'
-                            '${snapshot.data[0].data["displayName"].substring(1)}',
+                            '${snapshot.data[0].data()["displayName"][0].toUpperCase()}'
+                            '${snapshot.data[0].data()["displayName"].substring(1)}',
                             style: TextStyle(
                                 color: textColor,
                                 fontSize: 25.0,
@@ -686,7 +698,7 @@ class _profile2State extends State<profile2> {
                         SizedBox(height: 5.0),
                         Center(
                           child: Text(
-                            snapshot.data[0].data["email"],
+                            snapshot.data[0].data()["email"],
                             style: TextStyle(
                                 color: textColor,
                                 fontSize: 12.0,
@@ -703,7 +715,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data["recipeUsed"]
+                                        snapshot.data[0].data()["recipeUsed"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
@@ -729,7 +741,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data["recipeUploaded"]
+                                        snapshot.data[0].data()["recipeUploaded"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
@@ -755,7 +767,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data["countOfItems"]
+                                        snapshot.data[0].data()["countOfItems"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
@@ -1113,7 +1125,7 @@ void _settingModalBottomSheet(context) {
                     }),
                 new ListTile(
                   leading: new Icon(
-                    FontAwesomeIcons.penNib,
+                    FontAwesomeIcons.penNib.data,
                     color: Colors.white,
                   ),
                   title: new Text(

@@ -24,7 +24,7 @@ class _bottomBar2State extends State<bottomBar2> {
     profile2(),
   ];
 
-  List<IconData> _icons = [
+  List<FaIconData> _icons = [
     FontAwesomeIcons.home,
     FontAwesomeIcons.solidCheckCircle,
     FontAwesomeIcons.clipboardCheck,
@@ -84,7 +84,7 @@ class _bottomBar2State extends State<bottomBar2> {
               _selectedIndex == index ? Colors.transparent : Colors.transparent,
         ),
         child: Icon(
-          _icons[index],
+          _icons[index].data,
           size: 25.0,
           color: _selectedIndex == index ? colorIcon : Color(0xFFB4C1C4),
         ),

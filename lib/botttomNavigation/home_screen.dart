@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/search/searchAppBar.dart';
-import 'package:food_recommendation/widgetBar/searchDish.dart';
 import 'package:food_recommendation/widgetBar/selectedDishesWidget.dart';
 import 'package:food_recommendation/widgetBar/trendingBeverages.dart';
 import 'package:food_recommendation/widgetBar/trendingDesserts.dart';
 import 'package:food_recommendation/widgetBar/trendingDishes.dart';
 
-String dishType;
-String dishAll;
+String? dishType;
+String? dishAll;
 
 class home_screen extends StatefulWidget {
   @override
@@ -32,7 +31,7 @@ class _home_screenState extends State<home_screen> {
     searchAppBar(),
   ];
 
-  List<IconData> _icons = [
+  List<FaIconData> _icons = [
     FontAwesomeIcons.utensils,
     FontAwesomeIcons.glassMartini,
     FontAwesomeIcons.iceCream,
@@ -40,7 +39,7 @@ class _home_screenState extends State<home_screen> {
     FontAwesomeIcons.search,
   ];
 
-  String head;
+  late String head;
 
   @override
   void initState() {
@@ -146,7 +145,7 @@ class _home_screenState extends State<home_screen> {
           borderRadius: BorderRadius.circular(30),
         ),
         child: Icon(
-          _icons[index],
+          _icons[index].data,
           size: MediaQuery.of(context).size.width / 15.65,
           color: _selectedIndex == index ? colorIcon : Color(0xFFB4C1C4),
         ),

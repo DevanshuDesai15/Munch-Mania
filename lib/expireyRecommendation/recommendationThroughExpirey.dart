@@ -15,33 +15,33 @@ class recommendationThroughExpirey extends StatefulWidget {
 
 class _recommendationThroughExpireyState
     extends State<recommendationThroughExpirey> {
-  List<String> myList = List<String>();
+  List<String> myList = <String>[];
 
   Future getPosts() async {
-    var qn = await Firestore.instance
+    var qn = await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("inventory")
         .where("expiringIn", isLessThanOrEqualTo: 5)
         .where("expiringIn", isGreaterThanOrEqualTo: 0)
-        .getDocuments();
-    if (qn.documents.length > 10) {
+        .get();
+    if (qn.docs.length > 10) {
       for (int i = 0; i < 10; i++) {
-        myList.add(qn.documents[i].data["productName"]);
+        myList.add(qn.docs[i].data()["productName"]);
       }
-    } else if (qn.documents.length < 10) {
-      for (int i = 0; i < qn.documents.length; i++) {
-        myList.add(qn.documents[i].data["productName"]);
+    } else if (qn.docs.length < 10) {
+      for (int i = 0; i < qn.docs.length; i++) {
+        myList.add(qn.docs[i].data()["productName"]);
       }
     }
-    var an = await Firestore.instance
+    var an = await FirebaseFirestore.instance
         .collection("recipes")
-        .document(dishType)
-        .collection(dishAll)
+        .doc(dishType)
+        .collection(dishAll!)
         .where("Ingredients", arrayContainsAny: myList)
-        .getDocuments();
+        .get();
     myList.clear();
-    return an.documents;
+    return an.docs;
   }
 
   navigateToDetail(DocumentSnapshot post) {
@@ -132,16 +132,16 @@ class _recommendationThroughExpireyState
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data["dish"] == "veg") {
+                              if (snapshot.data[index].data()["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data["dish"] ==
+                              } else if (snapshot.data[index].data()["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
                                 color = Colors.green;
                               }
                               return Tooltip(
-                                message: snapshot.data[index].data["name"],
+                                message: snapshot.data[index].data()["name"],
                                 child: new Container(
                                   child: GestureDetector(
                                     onTap: () =>
@@ -229,7 +229,8 @@ class _recommendationThroughExpireyState
                                                           children: <Widget>[
                                                             Icon(
                                                               FontAwesomeIcons
-                                                                  .caretRight,
+                                                                  .caretRight
+                                                                  .data,
                                                               size: 20.0,
                                                               color:
                                                                   Colors.white,
@@ -258,7 +259,7 @@ class _recommendationThroughExpireyState
                                       ),
                                     ),
                                   ),
-                                  //title: Text(snapshot.data[index].data["productName"]),
+                                  //title: Text(snapshot.data[index].data()["productName"]),
                                 ),
                               );
                             }),

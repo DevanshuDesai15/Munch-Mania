@@ -18,7 +18,10 @@ class First extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: RaisedButton(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade300,
+                    ),
                     onPressed: () {
                       print('Login');
                     },
@@ -26,16 +29,17 @@ class First extends StatelessWidget {
                       'Login',
                       style: TextStyle(fontSize: 20.0),
                     ),
-                    color: Colors.red.shade300,
                   ),
                 ),
-                RaisedButton(
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade300,
+                  ),
                   onPressed: () {},
                   child: Text(
                     'Register',
                     style: TextStyle(fontSize: 20.0),
                   ),
-                  color: Colors.red.shade300,
                 )
               ],
             )));

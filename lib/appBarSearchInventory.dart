@@ -1,4 +1,3 @@
-import 'package:cupertino_icons/placeholder.txt';
 import 'package:flutter/material.dart';
 import 'package:food_recommendation/inventoryPack/addininventory.dart';
 import 'package:food_recommendation/inventoryPack/recipeAdder.dart';

@@ -7,9 +7,9 @@ import 'package:food_recommendation/botttomNavigation/profile2.dart';
 import 'package:food_recommendation/botttomNavigation/toDo.dart';
 
 class bottomBar extends StatefulWidget {
-  bottomBar({Key key, this.title}) : super(key: key);
+  bottomBar({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -35,15 +35,15 @@ class _MyHomePageState extends State<bottomBar> {
     return CupertinoTabScaffold(
         tabBar: CupertinoTabBar(backgroundColor: Colors.white, items: [
           BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home), title: Text("Home")),
+              icon: Icon(CupertinoIcons.home), label: "Home"),
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.check_mark_circled),
-              title: Text("Inventory")),
+              label: "Inventory"),
           BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.shopping_cart),
-              title: Text("To-Shop List")),
+              label: "To-Shop List"),
           BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person), title: Text("User Info"))
+              icon: Icon(CupertinoIcons.person), label: "User Info")
         ]),
         tabBuilder: (context, index) {
           switch (index) {
