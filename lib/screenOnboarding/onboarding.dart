@@ -25,17 +25,18 @@ class Onboarding extends StatelessWidget {
             );
           },
         ),
-        Container(
-          width: double.infinity,
-          height: 70,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: <Widget>[
-                Padding(
+        SafeArea(
+          child: Container(
+            width: double.infinity,
+            height: 70,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: <Widget>[
+                  Padding(
                     padding: const EdgeInsets.only(left: 32.0),
                     child: Container(
                       decoration: BoxDecoration(
@@ -48,30 +49,36 @@ class Onboarding extends StatelessWidget {
                           height: MediaQuery.of(context).size.width / 10,
                           width: MediaQuery.of(context).size.width / 10,
                           decoration: BoxDecoration(
-                              color: Colors.white,
-                              image: DecorationImage(
-                                  image: AssetImage("assets/logoTop.png"))),
+                            color: Colors.white,
+                            image: DecorationImage(
+                              image: AssetImage("assets/logoTop.png"),
+                            ),
+                          ),
                         ),
                       ),
-                    )),
-                Padding(
-                  padding: const EdgeInsets.only(right: 32.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => bottomBar2()),
-                          (_) => false);
-                    },
-                    child: Text(
-                      'Skip',
-                      style: TextStyle(
-                          color: colorProvider.color,
-                          fontSize: MediaQuery.of(context).size.width / 20),
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => bottomBar2()),
+                          (_) => false,
+                        );
+                      },
+                      child: Text(
+                        'Skip',
+                        style: TextStyle(
+                          color: colorProvider.color,
+                          fontSize: MediaQuery.of(context).size.width / 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -85,7 +92,7 @@ class Onboarding extends StatelessWidget {
               color: colorProvider.color,
             ),
           ),
-        )
+        ),
       ],
     );
   }
