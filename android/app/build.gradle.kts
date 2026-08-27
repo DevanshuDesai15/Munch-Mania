@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.DevaSam.food_recommendation"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
