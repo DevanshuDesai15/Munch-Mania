@@ -288,6 +288,8 @@ class _LoginPageState extends State<LoginPage> {
                                                                   builder: (context) =>
                                                                       handleWindowDisplayLog()));
                                                     } catch (err) {
+                                                      debugPrint(
+                                                          'signInWithPassword failed: $err');
                                                       showDialog(
                                                           context: context,
                                                           builder:
@@ -814,25 +816,30 @@ class _LoginPageState extends State<LoginPage> {
                                                       throw Exception(
                                                           'Sign up did not return a user');
                                                     }
-                                                    await supabase
-                                                        .from('profiles')
-                                                        .upsert({
-                                                      'id': newUser.id,
-                                                      'display_name':
-                                                          firstNameInputController
-                                                              .text,
-                                                      'email':
-                                                          emailInput1Controller
-                                                              .text,
-                                                      'image_url': '',
-                                                    });
-                                                    Navigator
-                                                        .pushAndRemoveUntil(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (context) =>
-                                                                    handleWindowDisplayReg()),
-                                                            (_) => false);
+                                                    // Best-effort: this insert needs an active
+                                                    // session, which signUp() won't have yet if
+                                                    // Supabase email confirmation is enabled.
+                                                    // ensureProfileExists() (main.dart) is the
+                                                    // real safety net once the user actually
+                                                    // logs in, so a failure here must not be
+                                                    // treated as signup failing.
+                                                    try {
+                                                      await supabase
+                                                          .from('profiles')
+                                                          .upsert({
+                                                        'id': newUser.id,
+                                                        'display_name':
+                                                            firstNameInputController
+                                                                .text,
+                                                        'email':
+                                                            emailInput1Controller
+                                                                .text,
+                                                        'image_url': '',
+                                                      });
+                                                    } catch (profileErr) {
+                                                      debugPrint(
+                                                          'profiles upsert on signup deferred: $profileErr');
+                                                    }
                                                     firstNameInputController
                                                         .clear();
                                                     lastNameInputController
@@ -843,7 +850,38 @@ class _LoginPageState extends State<LoginPage> {
                                                         .clear();
                                                     confirmPwdInputController
                                                         .clear();
+                                                    if (authResponse.session ==
+                                                        null) {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: (context) =>
+                                                              AlertDialog(
+                                                                title: Text(
+                                                                    'Check your email'),
+                                                                content: Text(
+                                                                    'Click the confirmation link we sent you, then log in.'),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    child: Text(
+                                                                        'OK'),
+                                                                    onPressed: () => Navigator.of(
+                                                                            context)
+                                                                        .pop(),
+                                                                  ),
+                                                                ],
+                                                              ));
+                                                    } else {
+                                                      Navigator
+                                                          .pushAndRemoveUntil(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      handleWindowDisplayReg()),
+                                                              (_) => false);
+                                                    }
                                                   } catch (err) {
+                                                    debugPrint(
+                                                        'signUp failed: $err');
                                                     showDialog(
                                                         context: context,
                                                         builder:
@@ -1029,6 +1067,7 @@ Future<User?> googleSignIn() async {
     }
     return user;
   } catch (error) {
+    debugPrint('googleSignIn failed: $error');
     return null;
   }
 }
