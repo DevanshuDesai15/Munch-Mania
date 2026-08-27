@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/screens/LoginScreen/loginScreen.dart';
@@ -43,68 +42,46 @@ class MyApp extends StatelessWidget {
 /// `expiringOn` timestamp, and moves anything expired (or with a negative
 /// quantity) into the app-generated todo list.
 Future<void> updateExpiryOfInventory() async {
-  QuerySnapshot qn = await FirebaseFirestore.instance
-      .collection("users")
-      .doc(userid)
-      .collection("inventory")
-      .get();
+  final rows = await supabase.from('inventory').select().eq('user_id', userid);
 
-  for (final doc in qn.docs) {
-    final data = doc.data() as Map<String, dynamic>;
-    final DateTime dateTimeNow = DateTime.now();
-    final DateTime dateTimeThen = (data['expiringOn'] as Timestamp).toDate();
-    final String productName = data['productName'] as String;
-    final String docId =
-        productName[0].toUpperCase() + productName.substring(1);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userid)
-        .collection('inventory')
-        .doc(docId)
-        .update({
-      'expiringIn': dateTimeThen.difference(dateTimeNow).inDays,
-    });
+  final DateTime dateTimeNow = DateTime.now();
+  for (final row in rows) {
+    final DateTime dateTimeThen = DateTime.parse(row['expiring_on'] as String);
+    await supabase
+        .from('inventory')
+        .update({'expiring_in': dateTimeThen.difference(dateTimeNow).inDays})
+        .eq('id', row['id']);
   }
 
   int count = 0;
-  for (final doc in qn.docs) {
-    final data = doc.data() as Map<String, dynamic>;
-    final int expiringIn = data['expiringIn'] as int? ?? 0;
-    final int quantity = data['quantity'] as int? ?? 0;
+  for (final row in rows) {
+    final int expiringIn = row['expiring_in'] as int? ?? 0;
+    final int quantity = row['quantity'] as int? ?? 0;
     if (expiringIn < 0 || quantity < 0) {
-      final String productName = data['productName'] as String;
-      final String docId =
-          productName[0].toUpperCase() + productName.substring(1);
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userid)
-          .collection("toDoList")
-          .doc("sections")
-          .collection("appToUserTodo")
-          .doc(docId)
-          .set({
-        'productName': productName,
+      await supabase.from('todo_items').insert({
+        'user_id': userid,
+        'section': 'app_to_user_todo',
+        'product_name': row['product_name'],
         'quantity': 0,
-        'unit': data['unit'],
-        'check': false,
+        'unit': row['unit'],
+        'checked': false,
       });
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userid)
-          .collection('inventory')
-          .doc(docId)
-          .delete();
+      await supabase.from('inventory').delete().eq('id', row['id']);
       count++;
     }
   }
 
   if (count > 0) {
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("PersonalDetails")
-        .doc("Details")
-        .update({"countOfItems": FieldValue.increment(-count)});
+    final profile = await supabase
+        .from('profiles')
+        .select('count_of_items')
+        .eq('id', userid)
+        .single();
+    final int current = profile['count_of_items'] as int? ?? 0;
+    await supabase
+        .from('profiles')
+        .update({'count_of_items': current - count})
+        .eq('id', userid);
   }
 }
 

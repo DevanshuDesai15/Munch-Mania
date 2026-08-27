@@ -1,24 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_recommendation/main.dart';
 
 class SearchService {
-  searchByName(String searchField) {
-    return FirebaseFirestore.instance
-        .collection('products')
-        .where('searchKey',
-            isEqualTo: searchField.substring(0, 1).toUpperCase())
-        .get();
+  Future<List<Map<String, dynamic>>> searchByName(String searchField) async {
+    final data = await supabase
+        .from('products')
+        .select()
+        .eq('search_key', searchField.substring(0, 1).toUpperCase());
+    return List<Map<String, dynamic>>.from(data);
   }
 
-  searchByButtonName(List searchField) {
+  Future<List<Map<String, dynamic>>> searchByButtonName(
+      List searchField) async {
     print(searchField);
-    return FirebaseFirestore.instance
-        .collection('products')
-        .where('searchCriteria', arrayContainsAny: searchField)
-        .get();
+    final data = await supabase
+        .from('products')
+        .select()
+        .overlaps('search_criteria', searchField);
+    return List<Map<String, dynamic>>.from(data);
   }
 
-  searchByButtonType(String searchField) {
+  Future<List<Map<String, dynamic>>> searchByButtonType(
+      String searchField) async {
     searchField = searchField.toLowerCase();
     if (searchField == "fruit" || searchField == "fruits") {
       searchField = "Fruit";
@@ -47,9 +49,10 @@ class SearchService {
       searchField = "Dairy";
     }
     print(searchField);
-    return FirebaseFirestore.instance
-        .collection('products')
-        .where('typeOfProduct', isEqualTo: searchField)
-        .get();
+    final data = await supabase
+        .from('products')
+        .select()
+        .eq('type_of_product', searchField);
+    return List<Map<String, dynamic>>.from(data);
   }
 }

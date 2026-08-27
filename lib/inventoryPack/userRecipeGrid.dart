@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_recommendation/inventoryPack/dessertUserRecipeGrid.dart';
 import 'package:food_recommendation/inventoryPack/drinkUserRecipeGrid.dart';
 import 'package:food_recommendation/inventoryPack/foodUserRecipeGrid.dart';

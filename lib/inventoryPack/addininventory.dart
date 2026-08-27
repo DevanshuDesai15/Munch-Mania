@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:food_recommendation/main.dart';
@@ -46,15 +45,15 @@ class _searchininventoryState extends State<addininventory> {
     var capitalizedValue =
         value.substring(0, 1).toUpperCase() + value.substring(1);
     if ((queryResultSet.length == 0 && value.length == 1)) {
-      SearchService().searchByName(value).then((QuerySnapshot docs) {
-        for (int i = 0; i < docs.docs.length; ++i) {
-          queryResultSet.add(docs.docs[i].data() as Map<String, dynamic>);
+      SearchService().searchByName(value).then((docs) {
+        for (int i = 0; i < docs.length; ++i) {
+          queryResultSet.add(docs[i]);
         }
       });
     } else {
       tempSearchStore = [];
       queryResultSet.forEach((element) {
-        if (element['productName'].startsWith(capitalizedValue)) {
+        if (element['product_name'].startsWith(capitalizedValue)) {
           setState(() {
             tempSearchStore.add(element);
           });
@@ -70,22 +69,22 @@ class _searchininventoryState extends State<addininventory> {
     value = value + " ";
     checker = value.split(" ");
     print(checker);
-    SearchService().searchByButtonName(checker).then((QuerySnapshot docs) {
+    SearchService().searchByButtonName(checker).then((docs) {
       setState(() {
         tempSearchStore = [];
       });
-      for (int i = 0; i < docs.docs.length; ++i) {
-        print((docs.docs[i].data() as Map<String, dynamic>)["productName"]);
-        tempSearchStore.add(docs.docs[i].data() as Map<String, dynamic>);
+      for (int i = 0; i < docs.length; ++i) {
+        print(docs[i]["product_name"]);
+        tempSearchStore.add(docs[i]);
       }
     });
-    SearchService().searchByButtonType(value2).then((QuerySnapshot docs) {
+    SearchService().searchByButtonType(value2).then((docs) {
       setState(() {
         tempSearchStore = tempSearchStore;
       });
-      for (int i = 0; i < docs.docs.length; ++i) {
-        print((docs.docs[i].data() as Map<String, dynamic>)["productName"]);
-        tempSearchStore.add(docs.docs[i].data() as Map<String, dynamic>);
+      for (int i = 0; i < docs.length; ++i) {
+        print(docs[i]["product_name"]);
+        tempSearchStore.add(docs[i]);
       }
     });
   }
@@ -274,31 +273,24 @@ class _searchininventoryState extends State<addininventory> {
                                                       null &&
                                                   _selectedLocation!
                                                       .isNotEmpty) {
-                                                FirebaseFirestore.instance
-                                                    .collection("admin")
-                                                    .doc(
-                                                        "inventoryRequest")
-                                                    .collection(userid)
-                                                    .doc((productController
-                                                                .text)[0]
-                                                            .toUpperCase() +
-                                                        (productController.text)
-                                                            .substring(1))
-                                                    .set({
-                                                  'expiry': int.parse(
+                                                supabase
+                                                    .from('inventory_requests')
+                                                    .insert({
+                                                  'user_id': userid,
+                                                  'expiry_days': int.parse(
                                                       expiryController.text),
-                                                  'productName':
+                                                  'product_name':
                                                       (productController
                                                                   .text)[0]
                                                               .toUpperCase() +
                                                           (productController
                                                                   .text)
                                                               .substring(1),
-                                                  'searchKey':
+                                                  'search_key':
                                                       (productController
                                                               .text)[0]
                                                           .toUpperCase(),
-                                                  'typeOfProduct':
+                                                  'type_of_product':
                                                       _selectedLocation,
                                                   'unit': _selectedLocation1,
                                                 });
@@ -496,7 +488,7 @@ Widget buildResultCard(data, BuildContext context) {
   TextEditingController recipenameController = new TextEditingController();
   TextEditingController quantityController = new TextEditingController();
   TextEditingController expiryController = new TextEditingController();
-  imageurll = data['imageURL'].toString();
+  imageurll = data['image_url'].toString();
   var col = Colors.grey;
 
   DateTime? selectedDate;
@@ -511,7 +503,7 @@ Widget buildResultCard(data, BuildContext context) {
 
   return GestureDetector(
     child: Tooltip(
-      message: data["productName"],
+      message: data["product_name"],
       child: Container(
         child: Container(
           decoration: BoxDecoration(
@@ -566,7 +558,7 @@ Widget buildResultCard(data, BuildContext context) {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              data["productName"],
+                              data["product_name"],
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24.0,
@@ -583,7 +575,7 @@ Widget buildResultCard(data, BuildContext context) {
                                 ),
                                 SizedBox(width: 2.0),
                                 Text(
-                                  data["typeOfProduct"],
+                                  data["type_of_product"],
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w300,
@@ -600,7 +592,7 @@ Widget buildResultCard(data, BuildContext context) {
                                 ),
                                 SizedBox(width: 2.0),
                                 Text(
-                                  'Expiry: ${(data['expiry']).toString()} days',
+                                  'Expiry: ${(data['expiry_days']).toString()} days',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w300,
@@ -628,10 +620,10 @@ Widget buildResultCard(data, BuildContext context) {
       ),
     ),
     onTap: () {
-      recipenameController.text = data['productName'];
-      expiryController.text = data['expiry'].toString();
-      if (data["typeOfProduct"] == "Vegetable" ||
-          data["typeOfProduct"] == "Fruit") {
+      recipenameController.text = data['product_name'];
+      expiryController.text = data['expiry_days'].toString();
+      if (data["type_of_product"] == "Vegetable" ||
+          data["type_of_product"] == "Fruit") {
         showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -739,46 +731,44 @@ Widget buildResultCard(data, BuildContext context) {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   RawMaterialButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
-                                        FirebaseFirestore.instance
-                                            .collection("users")
-                                            .doc(userid)
-                                            .collection("inventory")
-                                            .doc(data['productName'][0]
-                                                    .toUpperCase() +
-                                                data['productName']
-                                                    .substring(1))
-                                            .set({
-                                          'productName': data['productName'][0]
-                                                  .toLowerCase() +
-                                              data['productName'].substring(1),
-                                          'imageURL': data['imageURL'],
+                                        await supabase.from('inventory').insert({
+                                          'user_id': userid,
+                                          'product_name':
+                                              data['product_name'][0]
+                                                      .toLowerCase() +
+                                                  data['product_name']
+                                                      .substring(1),
+                                          'image_url': data['image_url'],
                                           'quantity': int.parse(
                                               quantityController.text),
-                                          'typeOfProduct':
-                                              data['typeOfProduct'],
-                                          'expiry':
+                                          'type_of_product':
+                                              data['type_of_product'],
+                                          'expiry_days':
                                               int.parse(expiryController.text),
                                           'unit': data['unit'],
-                                          //'timestampOfDateAdded':DateTime.now(),
-                                          //'presentDate':DateTime.now(),
-                                          'expiringOn': DateTime.now().add(
-                                              new Duration(
+                                          'expiring_on': DateTime.now()
+                                              .add(new Duration(
                                                   days: int.parse(
-                                                      expiryController.text))),
-                                          'expiringIn':
+                                                      expiryController.text)))
+                                              .toIso8601String(),
+                                          'expiring_in':
                                               int.parse(expiryController.text),
                                         });
-                                        FirebaseFirestore.instance
-                                            .collection("users")
-                                            .doc(userid)
-                                            .collection("PersonalDetails")
-                                            .doc("Details")
+                                        final profile = await supabase
+                                            .from('profiles')
+                                            .select()
+                                            .eq('id', userid)
+                                            .single();
+                                        await supabase
+                                            .from('profiles')
                                             .update({
-                                          "countOfItems":
-                                              FieldValue.increment(1)
-                                        });
+                                          "count_of_items":
+                                              (profile["count_of_items"] ??
+                                                      0) +
+                                                  1
+                                        }).eq('id', userid);
                                         Navigator.pop(context);
                                       }
                                     },
@@ -946,7 +936,7 @@ Widget buildResultCard(data, BuildContext context) {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 RawMaterialButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (selectedDate == null) {
                                       showDialog(
                                           context: context,
@@ -1018,45 +1008,39 @@ Widget buildResultCard(data, BuildContext context) {
                                             );
                                           });
                                     }
-                                    FirebaseFirestore.instance
-                                        .collection("users")
-                                        .doc(userid)
-                                        .collection("inventory")
-                                        .doc(data['productName'][0]
-                                                .toUpperCase() +
-                                            data['productName'].substring(1))
-                                        .set({
-                                      'productName':
-                                          data['productName'][0].toLowerCase() +
-                                              data['productName'].substring(1),
-                                      'imageURL': data['imageURL'],
+                                    await supabase.from('inventory').insert({
+                                      'user_id': userid,
+                                      'product_name':
+                                          data['product_name'][0].toLowerCase() +
+                                              data['product_name'].substring(1),
+                                      'image_url': data['image_url'],
                                       'quantity':
                                           int.parse(quantityController.text),
-                                      'typeOfProduct': data['typeOfProduct'],
-                                      'expiry':
+                                      'type_of_product': data['type_of_product'],
+                                      'expiry_days':
                                           int.parse(expiryController.text),
                                       'unit': data['unit'],
-                                      //'timestampOfDateAdded':DateTime.now(),
-                                      //'presentDate':DateTime.now(),
-                                      'expiringOn': selectedDate!.add(
-                                          new Duration(
+                                      'expiring_on': selectedDate!
+                                          .add(new Duration(
                                               days: int.parse(
-                                                  expiryController.text))),
-                                      'expiringIn': selectedDate!
+                                                  expiryController.text)))
+                                          .toIso8601String(),
+                                      'expiring_in': selectedDate!
                                           .add(new Duration(
                                               days: int.parse(
                                                   expiryController.text)))
                                           .difference(DateTime.now())
                                           .inDays,
                                     });
-                                    FirebaseFirestore.instance
-                                        .collection("users")
-                                        .doc(userid)
-                                        .collection("PersonalDetails")
-                                        .doc("Details")
-                                        .update({
-                                      "countOfItems": FieldValue.increment(1)
-                                    });
+                                    final profile = await supabase
+                                        .from('profiles')
+                                        .select()
+                                        .eq('id', userid)
+                                        .single();
+                                    await supabase.from('profiles').update({
+                                      "count_of_items":
+                                          (profile["count_of_items"] ?? 0) + 1
+                                    }).eq('id', userid);
                                     Navigator.pop(context);
                                   },
                                   child: new FaIcon(

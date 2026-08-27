@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_recommendation/main.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage2.dart';
 import 'package:food_recommendation/search/searchServiceForDrinks.dart';
 
@@ -26,11 +26,9 @@ class _searchBeverageState extends State<searchBeverage> {
     var capitalizedValue =
         value.substring(0, 1).toUpperCase() + value.substring(1);
     if (queryResultSet.length == 0 && value.length == 1) {
-      SearchServiceForBeverages()
-          .searchByName(value)
-          .then((QuerySnapshot docs) {
-        for (int i = 0; i < docs.docs.length; ++i) {
-          queryResultSet.add(docs.docs[i].data());
+      SearchServiceForBeverages().searchByName(value).then((docs) {
+        for (int i = 0; i < docs.length; ++i) {
+          queryResultSet.add(docs[i]);
         }
       });
     } else {
@@ -80,13 +78,9 @@ class _searchBeverageState extends State<searchBeverage> {
 }
 
 Future abcd(String dishName) async {
-  QuerySnapshot ab = await FirebaseFirestore.instance
-      .collection("recipes")
-      .doc("drinks")
-      .collection("allBeverages")
-      .get();
-  //print("Result : "+ab.data.toString());
-  return ab.docs;
+  final data =
+      await supabase.from('recipes').select().eq('category', 'drinks');
+  return List<Map<String, dynamic>>.from(data);
 }
 
 var color;
@@ -99,24 +93,14 @@ Widget buildResultCard(data, BuildContext context) {
     color = Colors.green;
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage2(post: post)));
   }
 
   return new Container(
     child: GestureDetector(
-      onTap: () => {
-        FirebaseFirestore.instance
-            .collection('recipes')
-            .doc("drinks")
-            .collection("allBeverages")
-            .where("name", isEqualTo: data["name"])
-            .get()
-            .then((QuerySnapshot docs) {
-          navigateToDetail(docs.docs[0]);
-        })
-      }, //navigateToDetail(abcd(data["name"])),
+      onTap: () => navigateToDetail(data),
       child: new GridTile(
         child: Container(
           decoration: BoxDecoration(
@@ -137,7 +121,7 @@ Widget buildResultCard(data, BuildContext context) {
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                         image: DecorationImage(
                             fit: BoxFit.cover,
-                            image: NetworkImage(data["imageURL"])),
+                            image: NetworkImage(data["image_url"])),
                       ),
                     ),
                     Positioned(
@@ -170,7 +154,7 @@ Widget buildResultCard(data, BuildContext context) {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            data["Name"],
+                            data["name"],
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 24.0,
@@ -187,7 +171,7 @@ Widget buildResultCard(data, BuildContext context) {
                               ),
                               SizedBox(width: 2.0),
                               Text(
-                                data["Cuisine"],
+                                data["cuisine"],
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),

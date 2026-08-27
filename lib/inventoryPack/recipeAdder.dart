@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:food_recommendation/main.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 List<String> myList = [];
 List<String> myGram = [];
@@ -52,7 +51,6 @@ class _recipeAdderState extends State<recipeAdder> {
   String strUnit = "";
   String strStepss = "";
 
-  final dbref = FirebaseFirestore.instance;
   int stepCount = 1;
   int ingredientCount = 1;
   int quantityCount = 1;
@@ -66,34 +64,36 @@ class _recipeAdderState extends State<recipeAdder> {
       _image = File(image.path);
       print('image Path$_image');
     });
-    Reference firebaseStorageRef =
-        FirebaseStorage.instance.ref().child("houseRecipes").child(userid);
-    UploadTask uploadTask =
-        firebaseStorageRef.child(abc + ".jpg").putFile(_image!);
-    var ImageUrl = await (await uploadTask).ref.getDownloadURL();
+    final bytes = await _image!.readAsBytes();
+    final path = "$userid/$abc.jpg";
+    await supabase.storage.from('house-recipe-images').uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+    final imageUrl =
+        supabase.storage.from('house-recipe-images').getPublicUrl(path);
     setState(() {
-      imageURLController.text = ImageUrl;
+      imageURLController.text = imageUrl;
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Recipe Image Uploaded Successfully')));
     });
   }
 
-  List<QueryDocumentSnapshot> _products = [];
+  List<Map<String, dynamic>> _products = [];
   getProductN() async {
-    Query q = FirebaseFirestore.instance.collection("getNameProducts");
-    QuerySnapshot querySnapshot = await q.get();
-    _products = querySnapshot.docs;
+    final rows = await supabase.from('products').select();
+    _products = rows;
     for (int i = 0; i < _products.length; i++) {
-      final data = _products[i].data() as Map<String, dynamic>;
-      myList.add(data["productName"]);
+      final data = _products[i];
+      myList.add(data["product_name"]);
       myGram.add(data["unit"]);
     }
   }
 
   Future getProductName() async {
-    QuerySnapshot qn =
-        await FirebaseFirestore.instance.collection("getNameProducts").get();
-    return qn.docs;
+    final rows = await supabase.from('products').select();
+    return rows;
   }
 
   late Future getProdName;
@@ -1156,7 +1156,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     foregroundColor: Colors.white,
                                   ),
                                   child: Text("Add To House Recipes"),
-                            onPressed: () {
+                            onPressed: () async {
                               if (_registerFormKey.currentState!.validate()) {
                                 if (_selectedLocation == null) {
                                   final snackBar = SnackBar(
@@ -1202,56 +1202,49 @@ class _recipeAdderState extends State<recipeAdder> {
                                 } else {
                                   if (_selectedLocationForFood == "beverage") {
                                     typeLoction = "drinks";
-                                    typeLoction2 = "allBeverages";
                                   } else if (_selectedLocationForFood ==
                                       "food") {
                                     typeLoction = "food";
-                                    typeLoction2 = "allFood";
                                   } else if (_selectedLocationForFood ==
                                       "dessert") {
                                     typeLoction = "dessert";
-                                    typeLoction2 = "allDessert";
                                   }
-                                  dbref
-                                      .collection("users")
-                                      .doc(userid)
-                                      .collection("HouseRecipes")
-                                      .doc(typeLoction!)
-                                      .collection(typeLoction2!)
-                                      .doc((recipenameController.text)[0]
-                                              .toUpperCase() +
-                                          recipenameController.text
-                                              .substring(1))
-                                      .set({
+                                  await supabase.from('house_recipes').insert({
+                                    'user_id': userid,
+                                    'category': typeLoction,
                                     'name': (recipenameController.text)[0]
                                             .toUpperCase() +
                                         recipenameController.text.substring(1),
                                     'description': descriptionController.text,
-                                    'imageURL': imageURLController.text,
-                                    'prepTime': int.parse(prepController.text),
-                                    'readyTime':
+                                    'image_url': imageURLController.text,
+                                    'prep_time': int.parse(prepController.text),
+                                    'ready_time':
                                         int.parse(readyController.text),
-                                    'searchKey': (recipenameController.text)[0]
+                                    'search_key': (recipenameController.text)[0]
                                         .toUpperCase(),
                                     'type': _selectedLocationForFood,
                                     'dish': _selectedLocation,
                                     'cuisine': cuisineController.text,
                                     'serving':
                                         int.parse(servingsController.text),
-                                    'Ingredients': ingredientsGrowable,
-                                    'IngredientQuantity': quantityGrowable,
-                                    'IngredientStepsNew': strSteps,
-                                    'unitNew': strUnit,
-                                    'stepsNew': strStepss,
+                                    'ingredients': ingredientsGrowable,
+                                    'ingredient_quantity': quantityGrowable,
+                                    'ingredient_steps': strSteps,
+                                    'unit_new': strUnit,
+                                    'steps': strStepss,
                                   });
-                                  dbref
-                                      .collection("users")
-                                      .doc(userid)
-                                      .collection("PersonalDetails")
-                                      .doc("Details")
-                                      .update({
-                                    "recipeUploaded": FieldValue.increment(1),
-                                  });
+                                  final profile = await supabase
+                                      .from('profiles')
+                                      .select('recipe_uploaded')
+                                      .eq('id', userid)
+                                      .single();
+                                  final currentRecipeUploaded =
+                                      (profile['recipe_uploaded'] as int?) ??
+                                          0;
+                                  await supabase.from('profiles').update({
+                                    'recipe_uploaded':
+                                        currentRecipeUploaded + 1,
+                                  }).eq('id', userid);
                                   strUnit = "";
                                   strSteps = "";
                                   strStepss = "";

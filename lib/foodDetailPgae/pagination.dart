@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_recommendation/main.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage2.dart';
 
 class pagination extends StatefulWidget {
@@ -8,28 +8,29 @@ class pagination extends StatefulWidget {
 }
 
 class _paginationState extends State<pagination> {
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<DocumentSnapshot> _products = [];
+  List<Map<String, dynamic>> _products = [];
   bool _loadingProducts = true;
   int _per_page = 20;
-  DocumentSnapshot? _lastDocument;
+  int _offset = 0;
   ScrollController _scrollController = ScrollController();
   bool _gettingMoreProducts = false;
   bool _moreProductsAvailable = true;
 
   _getProducts() async {
-    Query q = _firestore
-        .collection("recipes")
-        .doc("food")
-        .collection("allFood")
-        .orderBy("name")
-        .limit(_per_page);
     setState(() {
       _loadingProducts = true;
     });
-    QuerySnapshot querySnapshot = await q.get();
-    _products = querySnapshot.docs;
-    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    final data = await supabase
+        .from('recipes')
+        .select()
+        .eq('category', 'food')
+        .order('name')
+        .range(0, _per_page - 1);
+    _products = List<Map<String, dynamic>>.from(data);
+    _offset = _products.length;
+    if (_products.length < _per_page) {
+      _moreProductsAvailable = false;
+    }
     setState(() {
       _loadingProducts = false;
     });
@@ -45,25 +46,24 @@ class _paginationState extends State<pagination> {
       return;
     }
     _gettingMoreProducts = true;
-    final lastData = _lastDocument!.data() as Map<String, dynamic>;
-    Query q = _firestore
-        .collection("recipes")
-        .doc("food")
-        .collection("allFood")
-        .orderBy("name")
-        .startAfter([lastData["name"]]).limit(_per_page);
-    QuerySnapshot querySnapshot = await q.get();
-    if (querySnapshot.docs.length < _per_page) {
+    final data = await supabase
+        .from('recipes')
+        .select()
+        .eq('category', 'food')
+        .order('name')
+        .range(_offset, _offset + _per_page - 1);
+    final newProducts = List<Map<String, dynamic>>.from(data);
+    if (newProducts.length < _per_page) {
       _moreProductsAvailable = false;
     }
-    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
-    _products.addAll(querySnapshot.docs);
+    _offset += newProducts.length;
+    _products.addAll(newProducts);
     setState(() {
       _gettingMoreProducts = false;
     });
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage2(post: post)));
   }
@@ -101,8 +101,7 @@ class _paginationState extends State<pagination> {
                       controller: _scrollController,
                       itemCount: _products.length,
                       itemBuilder: (BuildContext ctx, int index) {
-                        final data =
-                            _products[index].data() as Map<String, dynamic>;
+                        final data = _products[index];
                         return ListTile(
                           title: Text(data["name"]),
                         );

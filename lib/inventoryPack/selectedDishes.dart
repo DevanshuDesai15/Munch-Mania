@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage.dart';
 import 'package:food_recommendation/main.dart';
 import 'package:food_recommendation/widgetBar/selectedDishesWidget.dart';
@@ -12,19 +10,15 @@ class selectedDishes extends StatefulWidget {
 
 class _selectedDishesState extends State<selectedDishes> {
   Future getSelectedDishes() async {
-    //List<String> names = ["Potatoes","Eggs","Chicken","Garlic","Onion","Lemon","Soda","paprika","yoghurt","ginger"];
-    //QuerySnapshot qn=await FirebaseFirestore.instance.collection("recipes").doc("food")
-    //  .collection("allFood").where("Ingredients",arrayContainsAny: names).get();
-    QuerySnapshot qn = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("cart")
-        .orderBy("timestampOfDateAdded", descending: true)
-        .get();
-    return qn.docs;
+    final rows = await supabase
+        .from('cart_items')
+        .select()
+        .eq('user_id', userid)
+        .order('created_at', ascending: false);
+    return rows;
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage(post: post)));
   }

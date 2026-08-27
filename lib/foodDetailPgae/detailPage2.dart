@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/botttomNavigation/profile2.dart';
 import 'package:food_recommendation/main.dart';
 
 class detailPage2 extends StatefulWidget {
-  final DocumentSnapshot post;
+  final Map<String, dynamic> post;
   detailPage2({required this.post});
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
@@ -21,7 +18,7 @@ class _UserProfilePageState extends State<detailPage2> {
   var iconColor;
   @override
   Widget build(BuildContext context) {
-    final data = widget.post.data() as Map<String, dynamic>;
+    final data = widget.post;
     if (data["dish"] == "veg") {
       dishColor = Colors.green;
     } else if (data["dish"] == "non-veg") {
@@ -43,10 +40,10 @@ class _UserProfilePageState extends State<detailPage2> {
       iconColor = Colors.amber;
     }
 
-    String stepsNew = data["stepsNew"];
+    String stepsNew = data["steps"];
     var stepsNewArr = stepsNew.split(' # ');
 
-    String IngredientStepsNew = data["IngredientStepsNew"];
+    String IngredientStepsNew = data["ingredient_steps"];
     var IngredientStepsNewArr = IngredientStepsNew.split(' # ');
 
     //String unitNew=data["unitNew"];
@@ -94,7 +91,7 @@ class _UserProfilePageState extends State<detailPage2> {
                             image: DecorationImage(
                                 fit: BoxFit.cover,
                                 image:
-                                    NetworkImage(data["imageURL"])),
+                                    NetworkImage(data["image_url"])),
                           ),
                         ),
                       ],
@@ -281,41 +278,31 @@ class _UserProfilePageState extends State<detailPage2> {
                                             color: Colors.white,
                                             size: 25.0,
                                           ),
-                                          onPressed: () {
-                                            FirebaseFirestore.instance
-                                                .collection("users")
-                                                .doc(userid)
-                                                .collection("cart")
-                                                .doc(
-                                                    data["name"])
-                                                .set({
+                                          onPressed: () async {
+                                            await supabase
+                                                .from('cart_items')
+                                                .insert({
+                                              "user_id": userid,
                                               "name": data["name"],
-                                              "prepTime":
-                                                  data["prepTime"],
-                                              "imageURL":
-                                                  data["imageURL"],
-                                              "readyTime":
-                                                  data["readyTime"],
-                                              "serving":
-                                                  data["serving"],
-                                              "cuisine":
-                                                  data["cuisine"],
+                                              "prep_time": data["prep_time"],
+                                              "image_url": data["image_url"],
+                                              "ready_time": data["ready_time"],
+                                              "serving": data["serving"],
+                                              "cuisine": data["cuisine"],
                                               "description":
                                                   data["description"],
                                               "type": data["type"],
-                                              "Ingredients":
-                                                  data["Ingredients"],
-                                              "IngredientQuantity":
-                                                  data["IngredientQuantity"],
+                                              "ingredients":
+                                                  data["ingredients"],
+                                              "ingredient_quantity":
+                                                  data["ingredient_quantity"],
                                               "dish": data["dish"],
-                                              "stepsNew":
-                                                  data["stepsNew"],
-                                              "searchKey":
-                                                  data["searchKey"],
-                                              "IngredientStepsNew":
-                                                  data["IngredientStepsNew"],
-                                              "unitNew":
-                                                  data["unitNew"],
+                                              "steps": data["steps"],
+                                              "search_key":
+                                                  data["search_key"],
+                                              "ingredient_steps":
+                                                  data["ingredient_steps"],
+                                              "unit_new": data["unit_new"],
                                             });
                                             Navigator.pushAndRemoveUntil(
                                                 context,
@@ -388,7 +375,7 @@ class _UserProfilePageState extends State<detailPage2> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["prepTime"].toString(),
+                        Text(data["prep_time"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -412,7 +399,7 @@ class _UserProfilePageState extends State<detailPage2> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["readyTime"].toString(),
+                        Text(data["ready_time"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -436,7 +423,7 @@ class _UserProfilePageState extends State<detailPage2> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["Ingredients"].length.toString(),
+                        Text(data["ingredients"].length.toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -487,7 +474,7 @@ class _UserProfilePageState extends State<detailPage2> {
                 height: 50,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: data["Ingredients"].length,
+                  itemCount: data["ingredients"].length,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8, top: 2),
@@ -505,8 +492,8 @@ class _UserProfilePageState extends State<detailPage2> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text(
-                                  "${data["Ingredients"][index][0].toUpperCase()}"
-                                  "${data["Ingredients"][index].substring(1)}")),
+                                  "${data["ingredients"][index][0].toUpperCase()}"
+                                  "${data["ingredients"][index].substring(1)}")),
                         ),
                       ),
                     );

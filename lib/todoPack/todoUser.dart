@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/main.dart';
@@ -18,15 +17,13 @@ class _todoUserState extends State<todoUser> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .doc(userid)
-            .collection("toDoList")
-            .doc("sections")
-            .collection("userTodo")
-            .orderBy("check", descending: false)
-            .snapshots(),
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: supabase
+            .from('todo_items')
+            .stream(primaryKey: ['id'])
+            .eq('user_id', userid)
+            .eq('section', 'user_todo')
+            .order('checked', ascending: true),
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -36,7 +33,7 @@ class _todoUserState extends State<todoUser> {
                         color: Colors.redAccent, type: SpinKitWaveType.start)),
               ),
             );
-          } else if (snapshot.data!.docs.length == 0) {
+          } else if (snapshot.data!.length == 0) {
             return ListView(
               children: <Widget>[
                 Padding(
@@ -75,9 +72,9 @@ class _todoUserState extends State<todoUser> {
           } else {
             return ListView.builder(
                 shrinkWrap: true,
-                itemCount: snapshot.data!.docs.length,
+                itemCount: snapshot.data!.length,
                 itemBuilder: (_, index) {
-                  if (snapshot.data!.docs[index].data()!["check"] == true) {
+                  if (snapshot.data![index]["checked"] == true) {
                     colorBgOfCheckbox = Colors.red.shade100;
                     colorIconCheckbox = Colors.red;
                   } else {
@@ -135,11 +132,11 @@ class _todoUserState extends State<todoUser> {
                                                     2) -
                                                 50,
                                         child: Text(
-                                          snapshot.data!.docs[index]
-                                                  .data()!["productName"][0]
+                                          snapshot.data![index]["product_name"]
+                                                  [0]
                                                   .toUpperCase() +
-                                              snapshot.data!.docs[index]
-                                                  .data()!["productName"]
+                                              snapshot.data![index]
+                                                      ["product_name"]
                                                   .substring(1),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 2,
@@ -181,16 +178,14 @@ class _todoUserState extends State<todoUser> {
                                       ),
                                     ),
                                     Text(
-                                      snapshot.data!.docs[index]
-                                          .data()!["quantity"]
+                                      snapshot.data![index]["quantity"]
                                           .toString(),
                                       style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                      snapshot
-                                          .data!.docs[index].data()!["unit"],
+                                      snapshot.data![index]["unit"],
                                       style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w300),
@@ -250,7 +245,7 @@ class _todoUserState extends State<todoUser> {
                                                       SizedBox(height: 5),
                                                       Center(
                                                         child: Text(
-                                                          'Present Quantity: ${snapshot.data!.docs[index].data()!["quantity"].toString()} grams',
+                                                          'Present Quantity: ${snapshot.data![index]["quantity"].toString()} grams',
                                                           style: TextStyle(
                                                               fontSize: 15,
                                                               fontWeight:
@@ -313,39 +308,21 @@ class _todoUserState extends State<todoUser> {
                                                                   Colors.white,
                                                               size: 25.0,
                                                             ),
-                                                            onPressed: () {
-                                                              FirebaseFirestore.instance
-                                                                  .collection(
-                                                                      'users')
-                                                                  .doc(
-                                                                      userid)
-                                                                  .collection(
-                                                                      'toDoList')
-                                                                  .doc(
-                                                                      "sections")
-                                                                  .collection(
-                                                                      "userTodo")
-                                                                  .doc(snapshot
-                                                                          .data!
-                                                                          .docs[
-                                                                              index]
-                                                                          .data()!["productName"]
-                                                                              [
-                                                                              0]
-                                                                          .toUpperCase() +
-                                                                      snapshot
-                                                                          .data!
-                                                                          .docs[
-                                                                              index]
-                                                                          .data()![
-                                                                              "productName"]
-                                                                          .substring(
-                                                                              1))
+                                                            onPressed:
+                                                                () async {
+                                                              await supabase
+                                                                  .from(
+                                                                      'todo_items')
                                                                   .update({
                                                                 'quantity': int.parse(
                                                                     quantityController
                                                                         .text),
-                                                              });
+                                                              }).eq(
+                                                                      'id',
+                                                                      snapshot
+                                                                              .data![
+                                                                          index]
+                                                                      ["id"]);
                                                               quantityController
                                                                   .clear();
                                                               Navigator.pop(
@@ -407,9 +384,8 @@ class _todoUserState extends State<todoUser> {
                                       ),
                                     ),
                                   ),
-                                  onTap: () {
-                                    if (snapshot.data!.docs[index]
-                                            .data()!["quantity"] <=
+                                  onTap: () async {
+                                    if (snapshot.data![index]["quantity"] <=
                                         0) {
                                       final snackBar = SnackBar(
                                         content: Text(
@@ -420,44 +396,19 @@ class _todoUserState extends State<todoUser> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(snackBar);
                                     } else {
-                                      if (snapshot.data!.docs[index]
-                                              .data()!["check"] ==
+                                      if (snapshot.data![index]["checked"] ==
                                           true) {
-                                        FirebaseFirestore.instance
-                                            .collection("users")
-                                            .doc(userid)
-                                            .collection("toDoList")
-                                            .doc("sections")
-                                            .collection("userTodo")
-                                            .doc((snapshot
-                                                        .data!
-                                                        .docs[index]
-                                                        .data()!["productName"])[0]
-                                                    .toUpperCase() +
-                                                snapshot.data!.docs[index]
-                                                    .data()!["productName"]
-                                                    .substring(1))
+                                        await supabase
+                                            .from('todo_items')
                                             .update({
-                                          "check": false,
-                                        });
+                                          "checked": false,
+                                        }).eq('id', snapshot.data![index]["id"]);
                                       } else {
-                                        FirebaseFirestore.instance
-                                            .collection("users")
-                                            .doc(userid)
-                                            .collection("toDoList")
-                                            .doc("sections")
-                                            .collection("userTodo")
-                                            .doc((snapshot
-                                                        .data!
-                                                        .docs[index]
-                                                        .data()!["productName"])[0]
-                                                    .toUpperCase() +
-                                                snapshot.data!.docs[index]
-                                                    .data()!["productName"]
-                                                    .substring(1))
+                                        await supabase
+                                            .from('todo_items')
                                             .update({
-                                          "check": true,
-                                        });
+                                          "checked": true,
+                                        }).eq('id', snapshot.data![index]["id"]);
                                         showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
@@ -507,65 +458,37 @@ class _todoUserState extends State<todoUser> {
                                                                     .white,
                                                                 size: 25.0,
                                                               ),
-                                                              onPressed: () {
-                                                                FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "users")
-                                                                    .doc(
-                                                                        userid)
-                                                                    .collection(
-                                                                        "toDoList")
-                                                                    .doc(
-                                                                        "sections")
-                                                                    .collection(
-                                                                        "finalTodo")
-                                                                    .doc((snapshot.data!.docs[index].data()!["productName"])[0]
-                                                                            .toUpperCase() +
-                                                                        snapshot
-                                                                            .data!
-                                                                            .docs[index]
-                                                                            .data()!["productName"]
-                                                                            .substring(1))
-                                                                    .set({
-                                                                  "unit": snapshot
-                                                                      .data!
-                                                                      .docs[
-                                                                          index]
-                                                                      .data()!["unit"],
-                                                                  "check":
+                                                              onPressed:
+                                                                  () async {
+                                                                await supabase
+                                                                    .from(
+                                                                        'todo_items')
+                                                                    .insert({
+                                                                  'user_id':
+                                                                      userid,
+                                                                  'section':
+                                                                      'final_todo',
+                                                                  'unit': snapshot
+                                                                          .data![
+                                                                      index]["unit"],
+                                                                  'checked':
                                                                       false,
-                                                                  "quantity": snapshot
-                                                                      .data!
-                                                                      .docs[
-                                                                          index]
-                                                                      .data()!["quantity"],
-                                                                  "productName": snapshot
-                                                                      .data!
-                                                                      .docs[
-                                                                          index]
-                                                                      .data()!["productName"],
+                                                                  'quantity': snapshot
+                                                                          .data![
+                                                                      index]["quantity"],
+                                                                  'product_name': snapshot
+                                                                          .data![
+                                                                      index]["product_name"],
                                                                 });
-                                                                FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "users")
-                                                                    .doc(
-                                                                        userid)
-                                                                    .collection(
-                                                                        "toDoList")
-                                                                    .doc(
-                                                                        "sections")
-                                                                    .collection(
-                                                                        "userTodo")
-                                                                    .doc((snapshot.data!.docs[index].data()!["productName"])[0]
-                                                                            .toUpperCase() +
-                                                                        snapshot
-                                                                            .data!
-                                                                            .docs[index]
-                                                                            .data()!["productName"]
-                                                                            .substring(1))
-                                                                    .delete();
+                                                                await supabase
+                                                                    .from(
+                                                                        'todo_items')
+                                                                    .delete()
+                                                                    .eq(
+                                                                        'id',
+                                                                        snapshot.data![
+                                                                            index]
+                                                                        ["id"]);
                                                                 Navigator.of(
                                                                         context)
                                                                     .pop();
@@ -644,7 +567,7 @@ class _todoUserState extends State<todoUser> {
                                           children: <Widget>[
                                             Center(
                                               child: Text(
-                                                "Want to remove ${snapshot.data!.docs[index].data()!["productName"]} from your list",
+                                                "Want to remove ${snapshot.data![index]["product_name"]} from your list",
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -670,29 +593,14 @@ class _todoUserState extends State<todoUser> {
                                                     color: Colors.white,
                                                     size: 25.0,
                                                   ),
-                                                  onPressed: () {
-                                                    FirebaseFirestore.instance
-                                                        .collection("users")
-                                                        .doc(userid)
-                                                        .collection("toDoList")
-                                                        .doc("sections")
-                                                        .collection("userTodo")
-                                                        .doc(snapshot
-                                                                .data!
-                                                                .docs[
-                                                                    index]
-                                                                .data()![
-                                                                    "productName"]
-                                                                    [0]
-                                                                .toUpperCase() +
-                                                            snapshot
-                                                                .data!
-                                                                .docs[
-                                                                    index]
-                                                                .data()![
-                                                                    "productName"]
-                                                                .substring(1))
-                                                        .delete();
+                                                  onPressed: () async {
+                                                    await supabase
+                                                        .from('todo_items')
+                                                        .delete()
+                                                        .eq(
+                                                            'id',
+                                                            snapshot.data![
+                                                                index]["id"]);
                                                     Navigator.pop(context);
                                                     /*Flushbar(
                                                       backgroundColor: Colors.redAccent,

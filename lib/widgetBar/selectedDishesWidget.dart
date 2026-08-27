@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage.dart';
@@ -17,21 +16,20 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController servingsController = new TextEditingController();
 
-  Future<List<QueryDocumentSnapshot>> getSelectedDishes() async {
-    QuerySnapshot qn = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("cart")
-        .get();
-    return qn.docs;
+  Future<List<Map<String, dynamic>>> getSelectedDishes() async {
+    final rows = await supabase
+        .from('cart_items')
+        .select()
+        .eq('user_id', userid);
+    return rows;
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage(post: post)));
   }
 
-  late Future<List<QueryDocumentSnapshot>> selected;
+  late Future<List<Map<String, dynamic>>> selected;
   @override
   void initState() {
     selected = getSelectedDishes();
@@ -41,7 +39,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
   var color;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<QueryDocumentSnapshot>>(
+    return FutureBuilder<List<Map<String, dynamic>>>(
         future: selected,
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -92,7 +90,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
               //shrinkWrap: true,
               itemCount: dishes.length,
               itemBuilder: (_, index) {
-                final data = dishes[index].data() as Map<String, dynamic>;
+                final data = dishes[index];
                 if (data["dish"] == "veg") {
                   color = Colors.green;
                 } else if (data["dish"] == "non-veg") {
@@ -139,7 +137,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                         topLeft: Radius.circular(20),
                                         bottomLeft: Radius.circular(20)),
                                     image: DecorationImage(
-                                      image: NetworkImage(data["imageURL"]),
+                                      image: NetworkImage(data["image_url"]),
                                       fit: BoxFit.cover,
                                       alignment: Alignment.topCenter,
                                     ),
@@ -362,62 +360,69 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                                     .white,
                                                                 size: 25.0,
                                                               ),
-                                                              onPressed: () {
+                                                              onPressed: () async {
                                                                 if (_formKey
                                                                     .currentState!
                                                                     .validate()) {
                                                                   for (int i =
                                                                           0;
                                                                       i <
-                                                                          (data["Ingredients"]
+                                                                          (data["ingredients"]
                                                                                   as List)
                                                                               .length;
                                                                       i++) {
-                                                                    FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                            "users")
-                                                                        .doc(
-                                                                            userid)
-                                                                        .collection(
-                                                                            "inventory")
-                                                                        .doc(data["Ingredients"][i][0].toUpperCase() +
-                                                                            data["Ingredients"][i].substring(1))
-                                                                        .update({
-                                                                      "quantity":
-                                                                          FieldValue.increment(-((data["IngredientQuantity"][i] / data["serving"]) *
-                                                                              _selectedLocation!))
-                                                                    });
+                                                                    final ingredientName =
+                                                                        data["ingredients"][i][0]
+                                                                                .toUpperCase() +
+                                                                            data["ingredients"][i]
+                                                                                .substring(1);
+                                                                    final delta =
+                                                                        (data["ingredient_quantity"][i] /
+                                                                                data["serving"]) *
+                                                                            _selectedLocation!;
+                                                                    final invRow =
+                                                                        await supabase
+                                                                            .from('inventory')
+                                                                            .select('id, quantity')
+                                                                            .eq('user_id', userid)
+                                                                            .eq('product_name',
+                                                                                ingredientName)
+                                                                            .maybeSingle();
+                                                                    if (invRow != null) {
+                                                                      final currentQty = (invRow[
+                                                                                  'quantity']
+                                                                              as num?) ??
+                                                                          0;
+                                                                      await supabase
+                                                                          .from('inventory')
+                                                                          .update({
+                                                                        'quantity':
+                                                                            currentQty - delta
+                                                                      }).eq('id', invRow['id']);
+                                                                    }
                                                                     servingsController
                                                                         .clear();
                                                                   }
 
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "users")
-                                                                      .doc(
-                                                                          userid)
-                                                                      .collection(
-                                                                          "cart")
-                                                                      .doc(data[
-                                                                          "name"])
-                                                                      .delete();
-                                                                  FirebaseFirestore
-                                                                      .instance
-                                                                      .collection(
-                                                                          "users")
-                                                                      .doc(
-                                                                          userid)
-                                                                      .collection(
-                                                                          "PersonalDetails")
-                                                                      .doc(
-                                                                          "Details")
+                                                                  await supabase
+                                                                      .from('cart_items')
+                                                                      .delete()
+                                                                      .eq('id', data['id']);
+                                                                  final profile = await supabase
+                                                                      .from('profiles')
+                                                                      .select('recipe_used')
+                                                                      .eq('id', userid)
+                                                                      .single();
+                                                                  final currentRecipeUsed =
+                                                                      (profile['recipe_used']
+                                                                              as int?) ??
+                                                                          0;
+                                                                  await supabase
+                                                                      .from('profiles')
                                                                       .update({
-                                                                    "recipeUsed":
-                                                                        FieldValue
-                                                                            .increment(1)
-                                                                  });
+                                                                    'recipe_used':
+                                                                        currentRecipeUsed + 1
+                                                                  }).eq('id', userid);
                                                                   setState(() {
                                                                     selected =
                                                                         getSelectedDishes();
@@ -531,17 +536,13 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                                   Colors.white,
                                                               size: 25.0,
                                                             ),
-                                                            onPressed: () {
-                                                              FirebaseFirestore.instance
-                                                                  .collection(
-                                                                      "users")
-                                                                  .doc(
-                                                                      userid)
-                                                                  .collection(
-                                                                      "cart")
-                                                                  .doc(data[
-                                                                      "name"])
-                                                                  .delete();
+                                                            onPressed: () async {
+                                                              await supabase
+                                                                  .from(
+                                                                      'cart_items')
+                                                                  .delete()
+                                                                  .eq('id',
+                                                                      data['id']);
                                                               setState(() {
                                                                 getSelectedDishes();
                                                               });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_recommendation/main.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/home_screen.dart';
@@ -11,17 +11,15 @@ class seeAllRecentlyAdded extends StatefulWidget {
 }
 
 class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
-  var firestore = FirebaseFirestore.instance
-      .collection("recipes")
-      .doc(dishType)
-      .collection(dishAll!);
-  late Future _recentlyAddedData;
-  Future getNewData() async {
-    QuerySnapshot qn = await firestore
-        .orderBy("timeStampOfDateCreated", descending: true)
-        .limit(10)
-        .get();
-    return qn.docs;
+  late Future<List<Map<String, dynamic>>> _recentlyAddedData;
+  Future<List<Map<String, dynamic>>> getNewData() async {
+    final data = await supabase
+        .from('recipes')
+        .select()
+        .eq('category', dishType!)
+        .order('created_at', ascending: false)
+        .limit(10);
+    return List<Map<String, dynamic>>.from(data);
   }
 
   @override
@@ -30,7 +28,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
     super.initState();
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage2(post: post)));
   }
@@ -107,25 +105,25 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                     children: <Widget>[
                       new Expanded(
                         child: new GridView.builder(
-                            itemCount: snapshot.data.length,
+                            itemCount: snapshot.data!.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data()["dish"] == "veg") {
+                              if (snapshot.data![index]["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data()["dish"] ==
+                              } else if (snapshot.data![index]["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
                                 color = Colors.green;
                               }
                               return Tooltip(
-                                message: snapshot.data[index].data()["name"],
+                                message: snapshot.data![index]["name"],
                                 child: new Container(
                                   child: GestureDetector(
                                     onTap: () =>
-                                        navigateToDetail(snapshot.data[index]),
+                                        navigateToDetail(snapshot.data![index]),
                                     child: new GridTile(
                                       child: Container(
                                         decoration: BoxDecoration(
@@ -157,8 +155,8 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                           BorderRadius.circular(
                                                               20.0),
                                                       child: Image.network(
-                                                        snapshot.data[index]
-                                                            .data()["imageURL"],
+                                                        snapshot.data![index]
+                                                            ["image_url"],
                                                         fit: BoxFit.cover,
                                                       ),
                                                     ),
@@ -195,8 +193,8 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                               .start,
                                                       children: <Widget>[
                                                         Text(
-                                                          snapshot.data[index]
-                                                              .data()["name"],
+                                                          snapshot.data![index]
+                                                              ["name"],
                                                           style: TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 24.0,
@@ -218,8 +216,8 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                                                 width: 2.0),
                                                             Text(
                                                               snapshot
-                                                                  .data[index]
-                                                                  .data()["name"],
+                                                                  .data![index]
+                                                                  ["name"],
                                                               style: TextStyle(
                                                                 color: Colors
                                                                     .white,
@@ -238,7 +236,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
                                       ),
                                     ),
                                   ),
-                                  //title: Text(snapshot.data[index].data()["productName"]),
+                                  //title: Text(snapshot.data[index]["productName"]),
                                 ),
                               );
                             }),

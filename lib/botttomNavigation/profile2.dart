@@ -11,11 +11,10 @@ import 'package:food_recommendation/main.dart';
 import 'package:food_recommendation/screens/Home/home.dart';
 import 'package:food_recommendation/screens/LoginScreen/loginScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 var cacheImageUrl = "";
 var textColor = Colors.black;
@@ -65,12 +64,15 @@ class _profile2State extends State<profile2> {
       print('image Path$_image');
       circularProgress = true;
     });
-    Reference firebaseStorageRef =
-        FirebaseStorage.instance.ref().child("UserProfilePhoto");
-    UploadTask uploadTask =
-        firebaseStorageRef.child(userid + ".jpg").putFile(_image!);
-    final snapshot = await uploadTask;
-    var ImageUrl = await snapshot.ref.getDownloadURL();
+    final storagePath = "$userid.jpg";
+    await supabase.storage.from('user-profile-photos').upload(
+          storagePath,
+          _image!,
+          fileOptions: const FileOptions(upsert: true),
+        );
+    var ImageUrl = supabase.storage
+        .from('user-profile-photos')
+        .getPublicUrl(storagePath);
     await supabase
         .from('profiles')
         .update({'image_url': ImageUrl}).eq('id', userid);

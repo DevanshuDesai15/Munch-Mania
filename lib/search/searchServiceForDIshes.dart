@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_recommendation/main.dart';
 
 class SearchServiceForDishes {
-  searchByName(String searchField) {
-    return FirebaseFirestore.instance
-        .collection('recipes')
-        .doc("food")
-        .collection("allFood")
-        .where('searchKey',
-            isEqualTo: searchField.substring(0, 1).toUpperCase())
-        .get();
+  Future<List<Map<String, dynamic>>> searchByName(String searchField) async {
+    final data = await supabase
+        .from('recipes')
+        .select()
+        .eq('category', 'food')
+        .eq('search_key', searchField.substring(0, 1).toUpperCase());
+    return List<Map<String, dynamic>>.from(data);
   }
 }

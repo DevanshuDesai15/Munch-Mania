@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:food_recommendation/botttomNavigation/profile2.dart';
 
@@ -37,11 +36,9 @@ class _fullScreenImageState extends State<fullScreenImage> {
                   setState(() {
                     cacheImageUrl = "";
                   });
-                  await FirebaseStorage.instance
-                      .ref()
-                      .child("UserProfilePhoto")
-                      .child(userid + ".jpg")
-                      .delete();
+                  await supabase.storage
+                      .from('user-profile-photos')
+                      .remove(["$userid.jpg"]);
                   await supabase
                       .from('profiles')
                       .update({'image_url': ''}).eq('id', userid);

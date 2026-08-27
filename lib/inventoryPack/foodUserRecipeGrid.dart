@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage2.dart';
 import 'package:food_recommendation/main.dart';
 
@@ -13,18 +11,15 @@ class foodUserRecipeGrid extends StatefulWidget {
 
 class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
   Future getPosts() async {
-    var firestore = FirebaseFirestore.instance;
-    QuerySnapshot qn = await firestore
-        .collection("users")
-        .doc(userid)
-        .collection("HouseRecipes")
-        .doc("food")
-        .collection("allFood")
-        .get();
-    return qn.docs;
+    final rows = await supabase
+        .from('house_recipes')
+        .select()
+        .eq('user_id', userid)
+        .eq('category', 'food');
+    return rows;
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(Map<String, dynamic> post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage2(post: post)));
   }
@@ -89,7 +84,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              final data = snapshot.data![index].data() as Map<String, dynamic>;
+                              final data = snapshot.data![index] as Map<String, dynamic>;
                               if (data["dish"] == "veg") {
                                 color = Colors.green;
                               } else if (data["dish"] ==
@@ -128,7 +123,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                     image: DecorationImage(
                                                         fit: BoxFit.cover,
                                                         image: NetworkImage(
-                                                            (snapshot.data![0].data() as Map<String, dynamic>)["imageURL"])),
+                                                            (snapshot.data![0] as Map<String, dynamic>)["image_url"])),
                                                   ),
                                                 ),
                                                 Positioned(
@@ -238,15 +233,17 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                                               size: 25.0,
                                                                             ),
                                                                             onPressed:
-                                                                                () {
-                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("HouseRecipes").doc("food").collection("allFood").doc(data["Name"]).delete();
+                                                                                () async {
+                                                                              await supabase.from('house_recipes').delete().eq('id', data['id']);
                                                                               setState(() {
                                                                                 getPosts();
                                                                               });
-                                                                              FirebaseStorage.instance.ref().child("houseRecipes").child(userid).child(data["name"] + ".jpg").delete();
-                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("PersonalDetails").doc("Details").update({
-                                                                                "recipeUploaded": FieldValue.increment(-1),
-                                                                              });
+                                                                              await supabase.storage.from('house-recipe-images').remove(['$userid/${data["name"]}.jpg']);
+                                                                              final profile = await supabase.from('profiles').select('recipe_uploaded').eq('id', userid).single();
+                                                                              final currentRecipeUploaded = (profile['recipe_uploaded'] as int?) ?? 0;
+                                                                              await supabase.from('profiles').update({
+                                                                                'recipe_uploaded': currentRecipeUploaded - 1,
+                                                                              }).eq('id', userid);
                                                                               Navigator.pop(context);
                                                                               /*Flushbar(
                                                                                 backgroundColor: Colors.redAccent,

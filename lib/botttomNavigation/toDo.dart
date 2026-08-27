@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:food_recommendation/main.dart';
 import 'package:food_recommendation/todoPack/todoAppBar.dart';
 
@@ -159,31 +157,22 @@ class HomePageWithState extends State<toDo> {
                                           color: Colors.white,
                                           size: 25.0,
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           if (_formKey.currentState!
                                               .validate()) {
                                             if (_selectedLocation1 != null) {
-                                              FirebaseFirestore.instance
-                                                  .collection('users')
-                                                  .doc(userid)
-                                                  .collection('toDoList')
-                                                  .doc("sections")
-                                                  .collection("userTodo")
-                                                  .doc(
-                                                      (productNameController
-                                                                  .text)[0]
-                                                              .toUpperCase() +
-                                                          (productNameController
-                                                                  .text)
-                                                              .substring(1))
-                                                  .set({
-                                                "productName":
+                                              await supabase
+                                                  .from('todo_items')
+                                                  .insert({
+                                                'user_id': userid,
+                                                'section': 'user_todo',
+                                                'product_name':
                                                     productNameController.text
                                                         .toLowerCase(),
                                                 'quantity': int.parse(
                                                     quantityController.text),
                                                 'unit': _selectedLocation1,
-                                                "check": false,
+                                                'checked': false,
                                               });
                                               productNameController.clear();
                                               quantityController.clear();

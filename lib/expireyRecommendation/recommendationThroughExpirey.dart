@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/home_screen.dart';
@@ -18,33 +17,31 @@ class _recommendationThroughExpireyState
   List<String> myList = <String>[];
 
   Future getPosts() async {
-    var qn = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("inventory")
-        .where("expiringIn", isLessThanOrEqualTo: 5)
-        .where("expiringIn", isGreaterThanOrEqualTo: 0)
-        .get();
-    if (qn.docs.length > 10) {
+    final qn = await supabase
+        .from('inventory')
+        .select()
+        .eq('user_id', userid)
+        .gte('expiring_in', 0)
+        .lte('expiring_in', 5);
+    if (qn.length > 10) {
       for (int i = 0; i < 10; i++) {
-        myList.add(qn.docs[i].data()["productName"]);
+        myList.add(qn[i]["product_name"]);
       }
-    } else if (qn.docs.length < 10) {
-      for (int i = 0; i < qn.docs.length; i++) {
-        myList.add(qn.docs[i].data()["productName"]);
+    } else if (qn.length < 10) {
+      for (int i = 0; i < qn.length; i++) {
+        myList.add(qn[i]["product_name"]);
       }
     }
-    var an = await FirebaseFirestore.instance
-        .collection("recipes")
-        .doc(dishType)
-        .collection(dishAll!)
-        .where("Ingredients", arrayContainsAny: myList)
-        .get();
+    final an = await supabase
+        .from('recipes')
+        .select()
+        .eq('category', dishType!)
+        .overlaps('ingredients', myList);
     myList.clear();
-    return an.docs;
+    return an;
   }
 
-  navigateToDetail(DocumentSnapshot post) {
+  navigateToDetail(dynamic post) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => detailPage2(post: post)));
   }
@@ -132,16 +129,16 @@ class _recommendationThroughExpireyState
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data()["dish"] == "veg") {
+                              if (snapshot.data[index]["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data()["dish"] ==
+                              } else if (snapshot.data[index]["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
                                 color = Colors.green;
                               }
                               return Tooltip(
-                                message: snapshot.data[index].data()["name"],
+                                message: snapshot.data[index]["name"],
                                 child: new Container(
                                   child: GestureDetector(
                                     onTap: () =>
@@ -178,7 +175,7 @@ class _recommendationThroughExpireyState
                                                               20.0),
                                                       child: Image.network(
                                                         snapshot.data[index]
-                                                            .data["imageURL"],
+                                                            ["image_url"],
                                                         fit: BoxFit.cover,
                                                       ),
                                                     ),
@@ -216,7 +213,7 @@ class _recommendationThroughExpireyState
                                                       children: <Widget>[
                                                         Text(
                                                           snapshot.data[index]
-                                                              .data["name"],
+                                                              ["name"],
                                                           style: TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 24.0,
@@ -240,7 +237,7 @@ class _recommendationThroughExpireyState
                                                             Text(
                                                               snapshot
                                                                   .data[index]
-                                                                  .data["name"],
+                                                                  ["name"],
                                                               style: TextStyle(
                                                                 color: Colors
                                                                     .white,

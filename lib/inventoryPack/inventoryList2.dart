@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:food_recommendation/main.dart';
@@ -17,13 +16,12 @@ class _inventoryList2State extends State<inventoryList2> {
   TextEditingController quantityController = new TextEditingController();
 
   Future getInventoryList() async {
-    QuerySnapshot qn = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("inventory")
-        .orderBy('expiringIn', descending: false)
-        .get();
-    return qn.docs;
+    final rows = await supabase
+        .from('inventory')
+        .select()
+        .eq('user_id', userid)
+        .order('expiring_in', ascending: true);
+    return rows;
   }
 
   @override
@@ -31,13 +29,12 @@ class _inventoryList2State extends State<inventoryList2> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection("users")
-                .doc(userid)
-                .collection("inventory")
-                .orderBy('expiringIn', descending: false)
-                .snapshots(),
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: supabase
+                .from('inventory')
+                .stream(primaryKey: ['id'])
+                .eq('user_id', userid)
+                .order('expiring_in', ascending: true),
             builder: (_, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
@@ -48,7 +45,7 @@ class _inventoryList2State extends State<inventoryList2> {
                             type: SpinKitWaveType.start)),
                   ),
                 );
-              } else if (snapshot.data!.docs.length == 0) {
+              } else if (snapshot.data!.length == 0) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(children: <Widget>[
@@ -90,23 +87,22 @@ class _inventoryList2State extends State<inventoryList2> {
               } else {
                 return ListView.builder(
                   shrinkWrap: true,
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: snapshot.data!.length,
                   itemBuilder: (_, index) {
                     print("a");
-                    final data = snapshot.data!.docs[index].data()
-                        as Map<String, dynamic>;
-                    if (data["expiringIn"] ==
+                    final data = snapshot.data![index];
+                    if (data["expiring_in"] ==
                             0 ||
-                        data["expiringIn"] < 0) {
+                        data["expiring_in"] < 0) {
                       colorsCard = Colors.red;
-                    } else if ((data["expiringIn"] >
+                    } else if ((data["expiring_in"] >
                             0) &&
-                        (data["expiringIn"] <=
+                        (data["expiring_in"] <=
                             3)) {
                       colorsCard = Colors.red.shade200;
-                    } else if ((data["expiringIn"] >
+                    } else if ((data["expiring_in"] >
                             0) &&
-                        (data["expiringIn"] <=
+                        (data["expiring_in"] <=
                             5)) {
                       colorsCard = Colors.red.shade100;
                     } else {
@@ -115,7 +111,7 @@ class _inventoryList2State extends State<inventoryList2> {
 
                     return Tooltip(
                       message:
-                          "${data["productName"]}",
+                          "${data["product_name"]}",
                       child: Container(
                         color: Colors.white,
                         child: Padding(
@@ -152,7 +148,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     topLeft:
                                                         Radius.circular(5)),
                                                 image: DecorationImage(
-                                                  image: NetworkImage(data["imageURL"]),
+                                                  image: NetworkImage(data["image_url"]),
                                                   fit: BoxFit.cover,
                                                   alignment:
                                                       Alignment.topCenter,
@@ -195,7 +191,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 8, 0, 3),
                                                     child: Text(
-                                                      "${data["productName"][0].toUpperCase()}${data["productName"].substring(1)}",
+                                                      "${data["product_name"][0].toUpperCase()}${data["product_name"].substring(1)}",
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       maxLines: 1,
@@ -210,7 +206,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 0, 0, 2),
                                                     child: Text(
-                                                      'Type: ${data["typeOfProduct"]}',
+                                                      'Type: ${data["type_of_product"]}',
                                                       style: TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
@@ -221,7 +217,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(0, 0, 0, 5),
                                                     child: Text(
-                                                      'Expiring in ${data["expiringIn"]} days',
+                                                      'Expiring in ${data["expiring_in"]} days',
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(
@@ -433,20 +429,15 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                     ),
                                                                     onPressed:
                                                                         () {
-                                                                      FirebaseFirestore.instance
-                                                                          .collection(
-                                                                              'users')
-                                                                          .doc(
-                                                                              userid)
-                                                                          .collection(
+                                                                      supabase
+                                                                          .from(
                                                                               'inventory')
-                                                                          .doc(data["productName"][0].toUpperCase() +
-                                                                              data["productName"].substring(
-                                                                                  1))
                                                                           .update({
                                                                         'quantity':
                                                                             int.parse(quantityController.text),
-                                                                      }).catchError((err) =>
+                                                                      }).eq(
+                                                                          'id',
+                                                                          data['id']).catchError((err) =>
                                                                               print("kush" + err));
                                                                       quantityController
                                                                           .clear();
@@ -597,31 +588,31 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                     size: 25.0,
                                                                   ),
                                                                   onPressed:
-                                                                      () {
-                                                                    FirebaseFirestore.instance
-                                                                        .collection(
-                                                                            'users')
-                                                                        .doc(
-                                                                            userid)
-                                                                        .collection(
+                                                                      () async {
+                                                                    await supabase
+                                                                        .from(
                                                                             'inventory')
-                                                                        .doc(data["productName"][0].toUpperCase() +
-                                                                            data["productName"].substring(1))
-                                                                        .delete();
-                                                                    FirebaseFirestore.instance
-                                                                        .collection(
-                                                                            'users')
-                                                                        .doc(
-                                                                            userid)
-                                                                        .collection(
-                                                                            'PersonalDetails')
-                                                                        .doc(
-                                                                            'Details')
+                                                                        .delete()
+                                                                        .eq(
+                                                                            'id',
+                                                                            data['id']);
+                                                                    final profile =
+                                                                        await supabase
+                                                                            .from('profiles')
+                                                                            .select()
+                                                                            .eq('id', userid)
+                                                                            .single();
+                                                                    await supabase
+                                                                        .from(
+                                                                            'profiles')
                                                                         .update({
-                                                                      "countOfItems":
-                                                                          FieldValue.increment(
-                                                                              -1)
-                                                                    });
+                                                                      "count_of_items":
+                                                                          (profile["count_of_items"] ??
+                                                                                  0) -
+                                                                              1
+                                                                    }).eq(
+                                                                            'id',
+                                                                            userid);
                                                                     setState(
                                                                         () {
                                                                       getInventoryList();
@@ -630,7 +621,7 @@ class _inventoryList2State extends State<inventoryList2> {
                                                                         context);
                                                                     /*Flushbar(
                                                                       backgroundColor: Colors.redAccent,
-                                                                      message: "${snapshot.data[index].data["productName"][0].toUpperCase()+snapshot.data[index].data["productName"].substring(1)} is removed from your inventory!",
+                                                                      message: "${snapshot.data[index].data["product_name"][0].toUpperCase()+snapshot.data[index].data["product_name"].substring(1)} is removed from your inventory!",
                                                                       duration: Duration(seconds: 2),
                                                                     )..show(context);*/
                                                                   },

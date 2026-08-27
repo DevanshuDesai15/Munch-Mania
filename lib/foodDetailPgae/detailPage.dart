@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/botttomNavigation/profile2.dart';
 import 'package:food_recommendation/main.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class detailPage extends StatefulWidget {
-  final DocumentSnapshot post;
+  final Map<String, dynamic> post;
   detailPage({required this.post});
 
   @override
@@ -28,7 +26,7 @@ class _detailPageState extends State<detailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final data = widget.post.data() as Map<String, dynamic>;
+    final data = widget.post;
     if (data["dish"] == "veg") {
       dishColor = Colors.green;
     } else if (data["dish"] == "non-veg") {
@@ -50,10 +48,10 @@ class _detailPageState extends State<detailPage> {
       iconColor = Colors.amber;
     }
 
-    String stepsNew = data["stepsNew"];
+    String stepsNew = data["steps"];
     var stepsNewArr = stepsNew.split(' # ');
 
-    String IngredientStepsNew = data["IngredientStepsNew"];
+    String IngredientStepsNew = data["ingredient_steps"];
     var IngredientStepsNewArr = IngredientStepsNew.split(' # ');
 
     //String unitNew=data["unitNew"];
@@ -102,14 +100,14 @@ class _detailPageState extends State<detailPage> {
                             image: DecorationImage(
                                 fit: BoxFit.cover,
                                 image:
-                                    NetworkImage(data["imageURL"])),
+                                    NetworkImage(data["image_url"])),
                           ),
                         ),
                       ],
                     ),
                   ),
                   Tooltip(
-                    message: "${data["Name"]}",
+                    message: "${data["name"]}",
                     child: Container(
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
@@ -179,7 +177,7 @@ class _detailPageState extends State<detailPage> {
                                                 fontWeight: FontWeight.w300),
                                           ),
                                           Text(
-                                            "Servings: ${data["servings"]}",
+                                            "Servings: ${data["serving"]}",
                                             style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w300),
@@ -344,52 +342,63 @@ class _detailPageState extends State<detailPage> {
                                             color: Colors.white,
                                             size: 25.0,
                                           ),
-                                          onPressed: () {
+                                          onPressed: () async {
                                             if (_formKey.currentState!
                                                 .validate()) {
+                                              final ingredients =
+                                                  data["ingredients"] as List;
+                                              final ingredientQuantity =
+                                                  data["ingredient_quantity"]
+                                                      as List;
                                               for (int i = 0;
-                                                  i <
-                                                      (data["Ingredients"]
-                                                              as List)
-                                                          .length;
+                                                  i < ingredients.length;
                                                   i++) {
-                                                FirebaseFirestore.instance
-                                                    .collection("users")
-                                                    .doc(userid)
-                                                    .collection("inventory")
-                                                    .doc(data["Ingredients"]
-                                                            [i][0]
+                                                final productName =
+                                                    ingredients[i][0]
                                                             .toUpperCase() +
-                                                        data["Ingredients"][i]
-                                                            .substring(1))
-                                                    .update({
-                                                  "quantity": FieldValue
-                                                      .increment(-((data[
-                                                                      "IngredientsQuantity"]
-                                                                  [i] /
-                                                              data[
-                                                                  "serving"]) *
-                                                          _selectedLocation!))
-                                                });
+                                                        ingredients[i]
+                                                            .substring(1);
+                                                final row = await supabase
+                                                    .from('inventory')
+                                                    .select()
+                                                    .eq('user_id', userid)
+                                                    .eq('product_name',
+                                                        productName)
+                                                    .maybeSingle();
+                                                if (row != null) {
+                                                  final newQuantity =
+                                                      (row['quantity'] ?? 0) -
+                                                          ((ingredientQuantity[
+                                                                      i] /
+                                                                  data[
+                                                                      "serving"]) *
+                                                              _selectedLocation!);
+                                                  await supabase
+                                                      .from('inventory')
+                                                      .update({
+                                                    'quantity': newQuantity
+                                                  }).eq('id', row['id']);
+                                                }
                                                 servingsController.clear();
                                               }
 
-                                              FirebaseFirestore.instance
-                                                  .collection("users")
-                                                  .doc(userid)
-                                                  .collection("cart")
-                                                  .doc(
-                                                      data["name"])
-                                                  .delete();
-                                              FirebaseFirestore.instance
-                                                  .collection("users")
-                                                  .doc(userid)
-                                                  .collection("PersonalDetails")
-                                                  .doc("Details")
+                                              await supabase
+                                                  .from('cart_items')
+                                                  .delete()
+                                                  .eq('id', data['id']);
+                                              final profile = await supabase
+                                                  .from('profiles')
+                                                  .select('recipe_used')
+                                                  .eq('id', userid)
+                                                  .single();
+                                              await supabase
+                                                  .from('profiles')
                                                   .update({
-                                                "recipeUsed":
-                                                    FieldValue.increment(1)
-                                              });
+                                                'recipe_used':
+                                                    (profile['recipe_used'] ??
+                                                            0) +
+                                                        1
+                                              }).eq('id', userid);
                                               Navigator.pushAndRemoveUntil(
                                                   context,
                                                   MaterialPageRoute(
@@ -465,7 +474,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["PreparationTime"].toString(),
+                        Text(data["prep_time"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -489,7 +498,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["readyTime"].toString(),
+                        Text(data["ready_time"].toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -513,7 +522,7 @@ class _detailPageState extends State<detailPage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        Text(data["Ingredients"].length.toString(),
+                        Text(data["ingredients"].length.toString(),
                             style: TextStyle(
                                 color: textColor,
                                 fontWeight: FontWeight.bold,
@@ -564,7 +573,7 @@ class _detailPageState extends State<detailPage> {
                 height: 50,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: data["Ingredients"].length,
+                  itemCount: data["ingredients"].length,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8, top: 2),
@@ -582,8 +591,8 @@ class _detailPageState extends State<detailPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text(
-                                  "${data["Ingredients"][index][0].toUpperCase()}"
-                                  "${data["Ingredients"][index].substring(1)}")),
+                                  "${data["ingredients"][index][0].toUpperCase()}"
+                                  "${data["ingredients"][index].substring(1)}")),
                         ),
                       ),
                     );
