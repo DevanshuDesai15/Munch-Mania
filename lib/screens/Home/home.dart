@@ -8,7 +8,7 @@ class home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChangeNotifierProvider(
-        builder: (context) => ColorProvider(),
+        create: (context) => ColorProvider(),
         child: Onboarding(),
       ),
     );

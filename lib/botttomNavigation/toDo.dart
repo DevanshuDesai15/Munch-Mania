@@ -18,8 +18,8 @@ class HomePageWithState extends State<toDo> {
   TextEditingController productNameController = new TextEditingController();
   TextEditingController quantityController = new TextEditingController();
   List<String> _locations1 = ['grams', 'ml', 'pieces'];
-  String _selectedLocation1;
-  Widget _createAppBar() {
+  String? _selectedLocation1;
+  PreferredSizeWidget _createAppBar() {
     return new AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
@@ -73,7 +73,7 @@ class HomePageWithState extends State<toDo> {
                                                 BorderRadius.circular(32.0)),
                                       ),
                                       validator: (value) {
-                                        if (value.length == 0) {
+                                        if (value == null || value.length == 0) {
                                           return "Please enter product name.";
                                         } else {
                                           return null;
@@ -96,7 +96,7 @@ class HomePageWithState extends State<toDo> {
                                                 BorderRadius.circular(32.0)),
                                       ),
                                       validator: (value) {
-                                        if (value.length == 0) {
+                                        if (value == null || value.length == 0) {
                                           return "Please enter the quantity.";
                                         } else {
                                           return null;
@@ -124,7 +124,7 @@ class HomePageWithState extends State<toDo> {
                                               value: _selectedLocation1,
                                               hint: Text("Units"),
                                               isDense: true,
-                                              onChanged: (String newValue) {
+                                              onChanged: (String? newValue) {
                                                 setState(() {
                                                   _selectedLocation1 = newValue;
                                                   state.didChange(newValue);
@@ -154,29 +154,29 @@ class HomePageWithState extends State<toDo> {
                                         elevation: 4.0,
                                         fillColor: Colors.lightBlueAccent,
                                         padding: const EdgeInsets.all(15.0),
-                                        child: new Icon(
+                                        child: new FaIcon(
                                           FontAwesomeIcons.check,
                                           color: Colors.white,
                                           size: 25.0,
                                         ),
                                         onPressed: () {
-                                          if (_formKey.currentState
+                                          if (_formKey.currentState!
                                               .validate()) {
                                             if (_selectedLocation1 != null) {
-                                              Firestore.instance
+                                              FirebaseFirestore.instance
                                                   .collection('users')
-                                                  .document(userid)
+                                                  .doc(userid)
                                                   .collection('toDoList')
-                                                  .document("sections")
+                                                  .doc("sections")
                                                   .collection("userTodo")
-                                                  .document(
+                                                  .doc(
                                                       (productNameController
                                                                   .text)[0]
                                                               .toUpperCase() +
                                                           (productNameController
                                                                   .text)
                                                               .substring(1))
-                                                  .setData({
+                                                  .set({
                                                 "productName":
                                                     productNameController.text
                                                         .toLowerCase(),
@@ -211,7 +211,7 @@ class HomePageWithState extends State<toDo> {
                                         elevation: 4.0,
                                         fillColor: Colors.redAccent,
                                         padding: const EdgeInsets.all(15.0),
-                                        child: new Icon(
+                                        child: new FaIcon(
                                           FontAwesomeIcons.times,
                                           color: Colors.white,
                                           size: 25.0,

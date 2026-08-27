@@ -13,28 +13,28 @@ class seeAllTop extends StatefulWidget {
 }
 
 class _seeAllTopState extends State<seeAllTop> {
-  Firestore _firestore = Firestore.instance;
-  List<DocumentSnapshot> _products = [];
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<DocumentSnapshot<Map<String, dynamic>>> _products = [];
   bool _loadingProducts = true;
   int _per_page = 10;
-  DocumentSnapshot _lastDocument;
+  DocumentSnapshot<Map<String, dynamic>>? _lastDocument;
   ScrollController _scrollController = ScrollController();
   bool _gettingMoreProducts = false;
   bool _moreProductsAvailable = true;
 
   getProducts() async {
-    Query q = _firestore
+    Query<Map<String, dynamic>> q = _firestore
         .collection("recipes")
-        .document(dishType)
-        .collection(dishAll)
+        .doc(dishType)
+        .collection(dishAll!)
         .orderBy("name")
         .limit(_per_page);
     setState(() {
       _loadingProducts = true;
     });
-    QuerySnapshot querySnapshot = await q.getDocuments();
-    _products = querySnapshot.documents;
-    _lastDocument = querySnapshot.documents[querySnapshot.documents.length - 1];
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await q.get();
+    _products = querySnapshot.docs;
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     setState(() {
       _loadingProducts = false;
     });
@@ -50,18 +50,18 @@ class _seeAllTopState extends State<seeAllTop> {
       return;
     }
     _gettingMoreProducts = true;
-    Query q = _firestore
+    Query<Map<String, dynamic>> q = _firestore
         .collection("recipes")
-        .document(dishType)
-        .collection(dishAll)
+        .doc(dishType)
+        .collection(dishAll!)
         .orderBy("name")
-        .startAfter([_lastDocument.data["name"]]).limit(_per_page);
-    QuerySnapshot querySnapshot = await q.getDocuments();
-    if (querySnapshot.documents.length < _per_page) {
+        .startAfter([_lastDocument!.data()!["name"]]).limit(_per_page);
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await q.get();
+    if (querySnapshot.docs.length < _per_page) {
       _moreProductsAvailable = false;
     }
-    _lastDocument = querySnapshot.documents[querySnapshot.documents.length];
-    _products.addAll(querySnapshot.documents);
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    _products.addAll(querySnapshot.docs);
     setState(() {
       _gettingMoreProducts = false;
     });
@@ -169,16 +169,16 @@ class _seeAllTopState extends State<seeAllTop> {
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2),
                               itemBuilder: (_, index) {
-                                if (_products[index].data["dish"] == "veg") {
+                                if (_products[index].data()!["dish"] == "veg") {
                                   color = Colors.green;
-                                } else if (_products[index].data["dish"] ==
+                                } else if (_products[index].data()!["dish"] ==
                                     "non-veg") {
                                   color = Colors.red;
                                 } else {
                                   color = Colors.green;
                                 }
                                 return Tooltip(
-                                  message: _products[index].data["name"],
+                                  message: _products[index].data()!["name"],
                                   child: new Container(
                                     child: GestureDetector(
                                       onTap: () =>
@@ -215,7 +215,7 @@ class _seeAllTopState extends State<seeAllTop> {
                                                                 .circular(20.0),
                                                         child: Image.network(
                                                           _products[index]
-                                                              .data["imageURL"],
+                                                              .data()!["imageURL"],
                                                           fit: BoxFit.cover,
                                                         ),
                                                       ),
@@ -256,7 +256,7 @@ class _seeAllTopState extends State<seeAllTop> {
                                                         children: <Widget>[
                                                           Text(
                                                             _products[index]
-                                                                .data["name"],
+                                                                .data()!["name"],
                                                             style: TextStyle(
                                                               color:
                                                                   Colors.white,
@@ -270,7 +270,7 @@ class _seeAllTopState extends State<seeAllTop> {
                                                           ),
                                                           Row(
                                                             children: <Widget>[
-                                                              Icon(
+                                                              FaIcon(
                                                                 FontAwesomeIcons
                                                                     .caretRight,
                                                                 size: 20.0,
@@ -281,7 +281,7 @@ class _seeAllTopState extends State<seeAllTop> {
                                                                   width: 2.0),
                                                               Text(
                                                                 _products[index]
-                                                                        .data[
+                                                                        .data()![
                                                                     "name"],
                                                                 style:
                                                                     TextStyle(

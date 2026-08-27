@@ -12,18 +12,18 @@ class selectedDishesWidget extends StatefulWidget {
 
 class _selectedDishesWidgetState extends State<selectedDishesWidget> {
   List<int> _numberList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  int _selectedLocation;
+  int? _selectedLocation;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController servingsController = new TextEditingController();
 
-  Future getSelectedDishes() async {
-    QuerySnapshot qn = await Firestore.instance
+  Future<List<QueryDocumentSnapshot>> getSelectedDishes() async {
+    QuerySnapshot qn = await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("cart")
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   navigateToDetail(DocumentSnapshot post) {
@@ -31,7 +31,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
         MaterialPageRoute(builder: (context) => detailPage(post: post)));
   }
 
-  Future selected;
+  late Future<List<QueryDocumentSnapshot>> selected;
   @override
   void initState() {
     selected = getSelectedDishes();
@@ -41,7 +41,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
   var color;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<QueryDocumentSnapshot>>(
         future: selected,
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -53,7 +53,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                         type: SpinKitWaveType.start)),
               ),
             );
-          } else if (snapshot.data.length == 0) {
+          } else if (snapshot.data == null || snapshot.data!.length == 0) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(children: <Widget>[
@@ -63,7 +63,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                       Padding(
                         padding: const EdgeInsets.only(
                             top: 20, left: 50, right: 50, bottom: 20),
-                        child: Icon(
+                        child: FaIcon(
                           FontAwesomeIcons.exclamation,
                           color: Colors.redAccent,
                           size: (MediaQuery.of(context).size.width) / 2,
@@ -87,13 +87,15 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
               ]),
             );
           } else {
+            final dishes = snapshot.data!;
             return ListView.builder(
               //shrinkWrap: true,
-              itemCount: snapshot.data.length,
+              itemCount: dishes.length,
               itemBuilder: (_, index) {
-                if (snapshot.data[index].data["dish"] == "veg") {
+                final data = dishes[index].data() as Map<String, dynamic>;
+                if (data["dish"] == "veg") {
                   color = Colors.green;
-                } else if (snapshot.data[index].data["dish"] == "non-veg") {
+                } else if (data["dish"] == "non-veg") {
                   color = Colors.red;
                 } else {
                   color = Colors.green;
@@ -107,10 +109,10 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Tooltip(
-                            message: snapshot.data[index].data["name"],
+                            message: data["name"],
                             child: GestureDetector(
                               onTap: () =>
-                                  navigateToDetail(snapshot.data[index]),
+                                  navigateToDetail(dishes[index]),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.orangeAccent,
@@ -137,8 +139,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                         topLeft: Radius.circular(20),
                                         bottomLeft: Radius.circular(20)),
                                     image: DecorationImage(
-                                      image: NetworkImage(snapshot
-                                          .data[index].data["imageURL"]),
+                                      image: NetworkImage(data["imageURL"]),
                                       fit: BoxFit.cover,
                                       alignment: Alignment.topCenter,
                                     ),
@@ -167,7 +168,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            snapshot.data[index].data["name"],
+                                            data["name"],
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 decoration: TextDecoration.none,
@@ -179,8 +180,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                             height: 2,
                                           ),
                                           Text(
-                                            snapshot
-                                                .data[index].data["cuisine"],
+                                            data["cuisine"],
                                             style: TextStyle(
                                                 decoration: TextDecoration.none,
                                                 color: Colors.white,
@@ -311,7 +311,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                                         "Number of Servings"),
                                                                     isDense:
                                                                         true,
-                                                                    onChanged: (int
+                                                                    onChanged: (int?
                                                                         newValue) {
                                                                       setState(
                                                                           () {
@@ -355,7 +355,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                                   const EdgeInsets
                                                                           .all(
                                                                       15.0),
-                                                              child: new Icon(
+                                                              child: new FaIcon(
                                                                 FontAwesomeIcons
                                                                     .check,
                                                                 color: Colors
@@ -364,59 +364,56 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                               ),
                                                               onPressed: () {
                                                                 if (_formKey
-                                                                    .currentState
+                                                                    .currentState!
                                                                     .validate()) {
                                                                   for (int i =
                                                                           0;
                                                                       i <
-                                                                          snapshot
-                                                                              .data[index]
-                                                                              .data["Ingredients"]
+                                                                          (data["Ingredients"]
+                                                                                  as List)
                                                                               .length;
                                                                       i++) {
-                                                                    Firestore
+                                                                    FirebaseFirestore
                                                                         .instance
                                                                         .collection(
                                                                             "users")
-                                                                        .document(
+                                                                        .doc(
                                                                             userid)
                                                                         .collection(
                                                                             "inventory")
-                                                                        .document(snapshot.data[index].data["Ingredients"][i][0].toUpperCase() +
-                                                                            snapshot.data[index].data["Ingredients"][i].substring(1))
-                                                                        .updateData({
+                                                                        .doc(data["Ingredients"][i][0].toUpperCase() +
+                                                                            data["Ingredients"][i].substring(1))
+                                                                        .update({
                                                                       "quantity":
-                                                                          FieldValue.increment(-((snapshot.data[index].data["IngredientQuantity"][i] / snapshot.data[index].data["serving"]) *
-                                                                              _selectedLocation))
+                                                                          FieldValue.increment(-((data["IngredientQuantity"][i] / data["serving"]) *
+                                                                              _selectedLocation!))
                                                                     });
                                                                     servingsController
                                                                         .clear();
                                                                   }
 
-                                                                  Firestore
+                                                                  FirebaseFirestore
                                                                       .instance
                                                                       .collection(
                                                                           "users")
-                                                                      .document(
+                                                                      .doc(
                                                                           userid)
                                                                       .collection(
                                                                           "cart")
-                                                                      .document(snapshot
-                                                                          .data[
-                                                                              index]
-                                                                          .data["name"])
+                                                                      .doc(data[
+                                                                          "name"])
                                                                       .delete();
-                                                                  Firestore
+                                                                  FirebaseFirestore
                                                                       .instance
                                                                       .collection(
                                                                           "users")
-                                                                      .document(
+                                                                      .doc(
                                                                           userid)
                                                                       .collection(
                                                                           "PersonalDetails")
-                                                                      .document(
+                                                                      .doc(
                                                                           "Details")
-                                                                      .updateData({
+                                                                      .update({
                                                                     "recipeUsed":
                                                                         FieldValue
                                                                             .increment(1)
@@ -446,7 +443,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                                   const EdgeInsets
                                                                           .all(
                                                                       15.0),
-                                                              child: new Icon(
+                                                              child: new FaIcon(
                                                                 FontAwesomeIcons
                                                                     .times,
                                                                 color: Colors
@@ -527,7 +524,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .check,
                                                               color:
@@ -535,17 +532,15 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                               size: 25.0,
                                                             ),
                                                             onPressed: () {
-                                                              Firestore.instance
+                                                              FirebaseFirestore.instance
                                                                   .collection(
                                                                       "users")
-                                                                  .document(
+                                                                  .doc(
                                                                       userid)
                                                                   .collection(
                                                                       "cart")
-                                                                  .document(snapshot
-                                                                      .data[
-                                                                          index]
-                                                                      .data["name"])
+                                                                  .doc(data[
+                                                                      "name"])
                                                                   .delete();
                                                               setState(() {
                                                                 getSelectedDishes();
@@ -568,7 +563,7 @@ class _selectedDishesWidgetState extends State<selectedDishesWidget> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .times,
                                                               color:

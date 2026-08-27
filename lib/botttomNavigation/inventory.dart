@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/inventoryPack/addininventory.dart';
 import 'package:food_recommendation/inventoryPack/inventoryList2.dart';
 import 'package:food_recommendation/inventoryPack/recipeAdder.dart';
 import 'package:food_recommendation/inventoryPack/selectedDishes.dart';
 import 'package:food_recommendation/inventoryPack/userRecipeGrid.dart';
-import 'package:food_recommendation/widgetBar/selectedDishesWidget.dart';
 
 class inventory extends StatefulWidget {
-  final String title;
+  final String? title;
   inventory({this.title});
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -130,14 +127,14 @@ class _MyHomePageState extends State<inventory> {
     );
   }
 
-  var color = Colors.blue[100];
+  var color = Colors.blue.shade100;
   var colorText = Colors.blueAccent;
   Widget _buildIcon(int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedIndex = index;
-          color = Colors.blue[100];
+          color = Colors.blue.shade100;
           colorText = Colors.blueAccent;
           wantToAdd = true;
         });

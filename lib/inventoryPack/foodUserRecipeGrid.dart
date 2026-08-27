@@ -13,15 +13,15 @@ class foodUserRecipeGrid extends StatefulWidget {
 
 class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
   Future getPosts() async {
-    var firestore = Firestore.instance;
+    var firestore = FirebaseFirestore.instance;
     QuerySnapshot qn = await firestore
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("HouseRecipes")
-        .document("food")
+        .doc("food")
         .collection("allFood")
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   navigateToDetail(DocumentSnapshot post) {
@@ -46,7 +46,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                             color: Colors.lightBlueAccent,
                             type: SpinKitWaveType.start)),
                   );
-                } else if (snapshot.data.length == 0) {
+                } else if (snapshot.data!.length == 0) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(children: <Widget>[
@@ -56,9 +56,9 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                             Padding(
                               padding:
                                   const EdgeInsets.only(top: 20, bottom: 20),
-                              child: Icon(
+                              child: FaIcon(
                                 FontAwesomeIcons.exclamation,
-                                color: Colors.blue[100],
+                                color: Colors.blue.shade100,
                                 size: (MediaQuery.of(context).size.width) / 2,
                               ),
                             ),
@@ -68,7 +68,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   height: 2,
-                                  color: Colors.blue[100],
+                                  color: Colors.blue.shade100,
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -84,14 +84,15 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                     children: <Widget>[
                       new Expanded(
                         child: new GridView.builder(
-                            itemCount: snapshot.data.length,
+                            itemCount: snapshot.data!.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2),
                             itemBuilder: (_, index) {
-                              if (snapshot.data[index].data["dish"] == "veg") {
+                              final data = snapshot.data![index].data() as Map<String, dynamic>;
+                              if (data["dish"] == "veg") {
                                 color = Colors.green;
-                              } else if (snapshot.data[index].data["dish"] ==
+                              } else if (data["dish"] ==
                                   "non-veg") {
                                 color = Colors.red;
                               } else {
@@ -100,7 +101,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                               return new Container(
                                 child: GestureDetector(
                                   onTap: () =>
-                                      navigateToDetail(snapshot.data[index]),
+                                      navigateToDetail(snapshot.data![index]),
                                   child: new GridTile(
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -127,9 +128,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                     image: DecorationImage(
                                                         fit: BoxFit.cover,
                                                         image: NetworkImage(
-                                                            snapshot.data[0]
-                                                                    .data[
-                                                                "imageURL"])),
+                                                            (snapshot.data![0].data() as Map<String, dynamic>)["imageURL"])),
                                                   ),
                                                 ),
                                                 Positioned(
@@ -233,25 +232,25 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                                             padding:
                                                                                 const EdgeInsets.all(15.0),
                                                                             child:
-                                                                                new Icon(
+                                                                                new FaIcon(
                                                                               FontAwesomeIcons.check,
                                                                               color: Colors.white,
                                                                               size: 25.0,
                                                                             ),
                                                                             onPressed:
                                                                                 () {
-                                                                              Firestore.instance.collection("users").document(userid).collection("HouseRecipes").document("food").collection("allFood").document(snapshot.data[index].data["Name"]).delete();
+                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("HouseRecipes").doc("food").collection("allFood").doc(data["Name"]).delete();
                                                                               setState(() {
                                                                                 getPosts();
                                                                               });
-                                                                              FirebaseStorage.instance.ref().child("houseRecipes").child(userid).child(snapshot.data[index].data["name"] + ".jpg").delete();
-                                                                              Firestore.instance.collection("users").document(userid).collection("PersonalDetails").document("Details").updateData({
+                                                                              FirebaseStorage.instance.ref().child("houseRecipes").child(userid).child(data["name"] + ".jpg").delete();
+                                                                              FirebaseFirestore.instance.collection("users").doc(userid).collection("PersonalDetails").doc("Details").update({
                                                                                 "recipeUploaded": FieldValue.increment(-1),
                                                                               });
                                                                               Navigator.pop(context);
                                                                               /*Flushbar(
                                                                                 backgroundColor: Colors.redAccent,
-                                                                                message: 'Removed "${snapshot.data[index].data["name"]}" from your Recipe List',
+                                                                                message: 'Removed "${data["name"]}" from your Recipe List',
                                                                                 duration: Duration(seconds: 2),
                                                                               )..show(context);*/
                                                                             },
@@ -266,7 +265,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                                             padding:
                                                                                 const EdgeInsets.all(15.0),
                                                                             child:
-                                                                                new Icon(
+                                                                                new FaIcon(
                                                                               FontAwesomeIcons.times,
                                                                               color: Colors.white,
                                                                               size: 25.0,
@@ -296,8 +295,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                             .start,
                                                     children: <Widget>[
                                                       Text(
-                                                        snapshot.data[index]
-                                                            .data["name"],
+                                                        data["name"],
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 24.0,
@@ -308,7 +306,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                       ),
                                                       Row(
                                                         children: <Widget>[
-                                                          Icon(
+                                                          FaIcon(
                                                             FontAwesomeIcons
                                                                 .caretRight,
                                                             size: 20.0,
@@ -316,8 +314,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                                           ),
                                                           SizedBox(width: 2.0),
                                                           Text(
-                                                            snapshot.data[index]
-                                                                    .data[
+                                                            data[
                                                                 "cuisine"],
                                                             style: TextStyle(
                                                               color:
@@ -337,7 +334,7 @@ class _foodUserRecipeGridState extends State<foodUserRecipeGrid> {
                                     ),
                                   ),
                                 ),
-                                //title: Text(snapshot.data[index].data["productName"]),
+                                //title: Text(data["productName"]),
                               );
                             }),
                       ),

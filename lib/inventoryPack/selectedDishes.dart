@@ -13,15 +13,15 @@ class selectedDishes extends StatefulWidget {
 class _selectedDishesState extends State<selectedDishes> {
   Future getSelectedDishes() async {
     //List<String> names = ["Potatoes","Eggs","Chicken","Garlic","Onion","Lemon","Soda","paprika","yoghurt","ginger"];
-    //QuerySnapshot qn=await Firestore.instance.collection("recipes").document("food")
-    //  .collection("allFood").where("Ingredients",arrayContainsAny: names).getDocuments();
-    QuerySnapshot qn = await Firestore.instance
+    //QuerySnapshot qn=await FirebaseFirestore.instance.collection("recipes").doc("food")
+    //  .collection("allFood").where("Ingredients",arrayContainsAny: names).get();
+    QuerySnapshot qn = await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("cart")
         .orderBy("timestampOfDateAdded", descending: true)
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   navigateToDetail(DocumentSnapshot post) {

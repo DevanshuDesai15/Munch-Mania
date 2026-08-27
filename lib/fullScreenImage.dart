@@ -16,7 +16,7 @@ class _fullScreenImageState extends State<fullScreenImage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.amber[300],
+        backgroundColor: Colors.amber.shade300,
         title: Text(
           "Profile Picture",
           style: TextStyle(color: Colors.white),
@@ -42,12 +42,12 @@ class _fullScreenImageState extends State<fullScreenImage> {
                         .child("UserProfilePhoto")
                         .child(userid + ".jpg")
                         .delete();
-                    Firestore.instance
+                    FirebaseFirestore.instance
                         .collection("users")
-                        .document(userid)
+                        .doc(userid)
                         .collection("PersonalDetails")
-                        .document("Details")
-                        .updateData({
+                        .doc("Details")
+                        .update({
                       'imageURL': "",
                     });
                   });

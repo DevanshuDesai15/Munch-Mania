@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:food_recommendation/Validations/validator.dart';
-import 'package:food_recommendation/botttomNavigation/home_screen.dart';
 import 'package:food_recommendation/screens/Home/home.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../main.dart';
@@ -15,10 +14,10 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-String pwdValid(String value) {
+String? pwdValid(String? value) {
   Pattern pattern = r'[0-9a-zA-Z!@#$%^&*]{6,}';
-  RegExp regex = new RegExp(pattern);
-  if (value.isEmpty) {
+  RegExp regex = RegExp(pattern as String);
+  if (value == null || value.isEmpty) {
     return 'Please enter password';
   } else {
     if (!regex.hasMatch(value))
@@ -33,17 +32,16 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formEmailKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _registerFormKey = GlobalKey<FormState>();
 
-  TextEditingController passemailController;
-  TextEditingController emailInputController;
-  TextEditingController pwdInputController;
+  late TextEditingController passemailController;
+  late TextEditingController emailInputController;
+  late TextEditingController pwdInputController;
 
-  TextEditingController firstNameInputController;
-  TextEditingController lastNameInputController;
-  TextEditingController emailInput1Controller;
-  TextEditingController pwdInput1Controller;
-  TextEditingController confirmPwdInputController;
+  late TextEditingController firstNameInputController;
+  late TextEditingController lastNameInputController;
+  late TextEditingController emailInput1Controller;
+  late TextEditingController pwdInput1Controller;
+  late TextEditingController confirmPwdInputController;
 
-  @override
   Future<void> resetPassword(String email) async {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
@@ -102,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red[300],
+                    color: Colors.red.shade300,
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
@@ -135,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                                           child: Container(
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: Colors.red[300],
+                                              color: Colors.red.shade300,
                                             ),
                                             child: Padding(
                                               padding:
@@ -180,19 +178,19 @@ class _LoginPageState extends State<LoginPage> {
                                           enableSuggestions: true,
                                           autofocus: true,
                                           autocorrect: true,
-                                          cursorColor: Colors.red[300],
+                                          cursorColor: Colors.red.shade300,
                                           decoration: InputDecoration(
                                             enabledBorder: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(32.0),
                                               borderSide: BorderSide(
-                                                  color: Colors.red[300]),
+                                                  color: Colors.red.shade300),
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(32.0),
                                               borderSide: BorderSide(
-                                                  color: Colors.red[300]),
+                                                  color: Colors.red.shade300),
                                             ),
                                             errorBorder: OutlineInputBorder(
                                               borderRadius:
@@ -210,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                                             hintText: 'Email',
                                             labelText: "Email",
                                             labelStyle: TextStyle(
-                                                color: Colors.red[300]),
+                                                color: Colors.red.shade300),
                                             contentPadding: EdgeInsets.fromLTRB(
                                                 20.0, 10.0, 20.0, 10.0),
                                           ),
@@ -221,11 +219,11 @@ class _LoginPageState extends State<LoginPage> {
                                         ),
                                         SizedBox(height: 18.0),
                                         TextFormField(
-                                          cursorColor: Colors.red[300],
+                                          cursorColor: Colors.red.shade300,
                                           decoration: InputDecoration(
                                             labelText: "Password",
                                             labelStyle: TextStyle(
-                                                color: Colors.red[300]),
+                                                color: Colors.red.shade300),
                                             hintText: 'Password',
                                             contentPadding: EdgeInsets.fromLTRB(
                                                 20.0, 10.0, 20.0, 10.0),
@@ -233,13 +231,13 @@ class _LoginPageState extends State<LoginPage> {
                                               borderRadius:
                                                   BorderRadius.circular(32.0),
                                               borderSide: BorderSide(
-                                                  color: Colors.red[300]),
+                                                  color: Colors.red.shade300),
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(32.0),
                                               borderSide: BorderSide(
-                                                  color: Colors.red[300]),
+                                                  color: Colors.red.shade300),
                                             ),
                                             errorBorder: OutlineInputBorder(
                                               borderRadius:
@@ -265,30 +263,32 @@ class _LoginPageState extends State<LoginPage> {
                                           child: Row(
                                             children: <Widget>[
                                               GestureDetector(
-                                                onTap: () {
-                                                  if (_loginFormKey.currentState
+                                                onTap: () async {
+                                                  if (_loginFormKey
+                                                      .currentState!
                                                       .validate()) {
-                                                    FirebaseAuth.instance
-                                                        .signInWithEmailAndPassword(
-                                                            email: emailInputController
-                                                                .text,
-                                                            password:
-                                                                pwdInputController
-                                                                    .text)
-                                                        .then((currentUser) =>
-                                                            Navigator.pushReplacement(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder: (context) => _handleWindowDisplayLog())).catchError(
-                                                                (err) =>
-                                                                    print(err)))
-                                                        .catchError((err) =>
-                                                            showDialog(
-                                                                context:
-                                                                    context,
-                                                                builder:
-                                                                    (BuildContext
-                                                                        context) {
+                                                    try {
+                                                      await FirebaseAuth
+                                                          .instance
+                                                          .signInWithEmailAndPassword(
+                                                              email:
+                                                                  emailInputController
+                                                                      .text,
+                                                              password:
+                                                                  pwdInputController
+                                                                      .text);
+                                                      Navigator
+                                                          .pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                  builder: (context) =>
+                                                                      handleWindowDisplayLog()));
+                                                    } catch (err) {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (BuildContext
+                                                                  context) {
                                                                   return Center(
                                                                     child:
                                                                         SingleChildScrollView(
@@ -332,12 +332,13 @@ class _LoginPageState extends State<LoginPage> {
                                                                       ),
                                                                     ),
                                                                   );
-                                                                }));
+                                                          });
+                                                    }
                                                   }
                                                 },
                                                 child: Container(
                                                   decoration: BoxDecoration(
-                                                      color: Colors.red[300],
+                                                      color: Colors.red.shade300,
                                                       borderRadius:
                                                           BorderRadius.all(
                                                               Radius.circular(
@@ -360,11 +361,11 @@ class _LoginPageState extends State<LoginPage> {
                                                   ),
                                                 ),
                                               ),
-                                              FlatButton(
+                                              TextButton(
                                                 child: Text(
                                                   'Forgot password?',
                                                   style: TextStyle(
-                                                      color: Colors.red[300]),
+                                                      color: Colors.red.shade300),
                                                 ),
                                                 onPressed: () {
                                                   showDialog(
@@ -463,7 +464,7 @@ class _LoginPageState extends State<LoginPage> {
                                                                               Widget>[
                                                                             RawMaterialButton(
                                                                               onPressed: () {
-                                                                                if (_formEmailKey.currentState.validate()) {
+                                                                                if (_formEmailKey.currentState!.validate()) {
                                                                                   resetPassword(passemailController.text);
                                                                                   passemailController.clear();
                                                                                   Navigator.pop(context);
@@ -512,7 +513,7 @@ class _LoginPageState extends State<LoginPage> {
                       transitionDuration: Duration(milliseconds: 300),
                       barrierDismissible: true,
                       barrierLabel: '',
-                      pageBuilder: (context, animation1, animation2) {});
+                      pageBuilder: (context, animation1, animation2) => Container());
                 },
               ),
               SizedBox(
@@ -547,7 +548,7 @@ class _LoginPageState extends State<LoginPage> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Colors.amber[300],
+                                            color: Colors.amber.shade300,
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -593,18 +594,18 @@ class _LoginPageState extends State<LoginPage> {
                                           hintText: 'Full Name',
                                           labelText: "Full Name",
                                           labelStyle: TextStyle(
-                                              color: Colors.amber[300]),
+                                              color: Colors.amber.shade300),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           errorBorder: OutlineInputBorder(
                                             borderRadius:
@@ -627,7 +628,7 @@ class _LoginPageState extends State<LoginPage> {
                                         ),
                                         controller: firstNameInputController,
                                         validator: (value) {
-                                          if (value.length < 3) {
+                                          if (value == null || value.length < 3) {
                                             return "Please enter your full name.";
                                           } else {
                                             return null;
@@ -641,18 +642,18 @@ class _LoginPageState extends State<LoginPage> {
                                           hintText: 'Email',
                                           labelText: "Email",
                                           labelStyle: TextStyle(
-                                              color: Colors.amber[300]),
+                                              color: Colors.amber.shade300),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           errorBorder: OutlineInputBorder(
                                             borderRadius:
@@ -684,18 +685,18 @@ class _LoginPageState extends State<LoginPage> {
                                           hintText: 'Password',
                                           labelText: "Password",
                                           labelStyle: TextStyle(
-                                              color: Colors.amber[300]),
+                                              color: Colors.amber.shade300),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           errorBorder: OutlineInputBorder(
                                             borderRadius:
@@ -726,18 +727,18 @@ class _LoginPageState extends State<LoginPage> {
                                           hintText: 'Confirm Password',
                                           labelText: "Confirm Password",
                                           labelStyle: TextStyle(
-                                              color: Colors.amber[300]),
+                                              color: Colors.amber.shade300),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(32.0),
                                             borderSide: BorderSide(
-                                                color: Colors.amber[300]),
+                                                color: Colors.amber.shade300),
                                           ),
                                           errorBorder: OutlineInputBorder(
                                             borderRadius:
@@ -773,131 +774,141 @@ class _LoginPageState extends State<LoginPage> {
                                                   .size
                                                   .width -
                                               100,
-                                          child: RaisedButton(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(24),
+                                              ),
+                                              padding: EdgeInsets.all(15),
+                                              backgroundColor:
+                                                  Colors.amber.shade300,
+                                              foregroundColor: Colors.white,
                                             ),
-                                            padding: EdgeInsets.all(15),
                                             child: Text("Register"),
-                                            color: Colors.amber[300],
-                                            textColor: Colors.white,
-                                            onPressed: () {
-                                              if (_registerFormKey.currentState
+                                            onPressed: () async {
+                                              if (_registerFormKey
+                                                  .currentState!
                                                   .validate()) {
                                                 if (pwdInput1Controller.text ==
                                                     confirmPwdInputController
                                                         .text) {
-                                                  FirebaseAuth.instance
-                                                      .createUserWithEmailAndPassword(
-                                                          email:
-                                                              emailInput1Controller
-                                                                  .text,
-                                                          password:
-                                                              pwdInput1Controller
-                                                                  .text)
-                                                      .then((currentUser) => Firestore
-                                                          .instance
-                                                          .collection("users")
-                                                          .document(currentUser
-                                                              .user.uid
-                                                              .toString())
-                                                          .collection(
-                                                              "PersonalDetails")
-                                                          .document("Details")
-                                                          .setData({
-                                                            'displayName':
-                                                                firstNameInputController
-                                                                    .text,
-                                                            'recipeUsed':
-                                                                int.parse('0'),
-                                                            'recipeUploaded':
-                                                                int.parse('0'),
-                                                            'countOfItems':
-                                                                int.parse('0'),
-                                                            'timeStampOfDateCreated':
-                                                                DateTime.now(),
-                                                            'imageURL': "",
-                                                            'email':
-                                                                emailInput1Controller
-                                                                    .text,
-                                                          })
-                                                          .then((result) => {
-                                                                Navigator.pushAndRemoveUntil(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                        builder:
-                                                                            (context) =>
-                                                                                _handleWindowDisplayReg()),
-                                                                    (_) =>
-                                                                        false),
-                                                                firstNameInputController
-                                                                    .clear(),
-                                                                lastNameInputController
-                                                                    .clear(),
-                                                                emailInput1Controller
-                                                                    .clear(),
-                                                                pwdInput1Controller
-                                                                    .clear(),
-                                                                confirmPwdInputController
-                                                                    .clear()
-                                                              })
-                                                          .catchError((err) =>
-                                                              print(err)))
-                                                      .catchError((err) =>
-                                                          showDialog(
-                                                              context: context,
-                                                              builder:
-                                                                  (BuildContext
-                                                                      context) {
-                                                                return Center(
-                                                                  child:
-                                                                      SingleChildScrollView(
-                                                                    child:
-                                                                        AlertDialog(
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .redAccent,
-                                                                      shape: RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.all(Radius.circular(32.0))),
-                                                                      content:
-                                                                          Column(
-                                                                        children: <
-                                                                            Widget>[
-                                                                          Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(15.0),
-                                                                            child:
-                                                                                Center(
-                                                                              child: Text(
-                                                                                "Could not create your account!!\n\nPlease try again later!",
-                                                                                textAlign: TextAlign.center,
-                                                                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                          Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: <Widget>[
-                                                                              RawMaterialButton(
-                                                                                shape: new CircleBorder(),
-                                                                                elevation: 4.0,
-                                                                                fillColor: Colors.white,
-                                                                                padding: const EdgeInsets.all(15.0),
-                                                                                onPressed: () {
-                                                                                  Navigator.pop(context);
-                                                                                },
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
+                                                  try {
+                                                    final currentUser =
+                                                        await FirebaseAuth
+                                                            .instance
+                                                            .createUserWithEmailAndPassword(
+                                                                email:
+                                                                    emailInput1Controller
+                                                                        .text,
+                                                                password:
+                                                                    pwdInput1Controller
+                                                                        .text);
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection("users")
+                                                        .doc(currentUser.user!
+                                                            .uid)
+                                                        .collection(
+                                                            "PersonalDetails")
+                                                        .doc("Details")
+                                                        .set({
+                                                      'displayName':
+                                                          firstNameInputController
+                                                              .text,
+                                                      'recipeUsed': 0,
+                                                      'recipeUploaded': 0,
+                                                      'countOfItems': 0,
+                                                      'timeStampOfDateCreated':
+                                                          DateTime.now(),
+                                                      'imageURL': "",
+                                                      'email':
+                                                          emailInput1Controller
+                                                              .text,
+                                                    });
+                                                    Navigator
+                                                        .pushAndRemoveUntil(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    handleWindowDisplayReg()),
+                                                            (_) => false);
+                                                    firstNameInputController
+                                                        .clear();
+                                                    lastNameInputController
+                                                        .clear();
+                                                    emailInput1Controller
+                                                        .clear();
+                                                    pwdInput1Controller
+                                                        .clear();
+                                                    confirmPwdInputController
+                                                        .clear();
+                                                  } catch (err) {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (BuildContext
+                                                                context) {
+                                                          return Center(
+                                                            child:
+                                                                SingleChildScrollView(
+                                                              child:
+                                                                  AlertDialog(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .redAccent,
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.all(Radius.circular(32.0))),
+                                                                content:
+                                                                    Column(
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Padding(
+                                                                      padding:
+                                                                          const EdgeInsets.all(15.0),
+                                                                      child:
+                                                                          Center(
+                                                                        child: Text(
+                                                                          "Could not create your account!!\n\nPlease try again later!",
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style: TextStyle(
+                                                                              fontWeight: FontWeight.bold,
+                                                                              color: Colors.white,
+                                                                              letterSpacing: 2),
+                                                                        ),
                                                                       ),
                                                                     ),
-                                                                  ),
-                                                                );
-                                                              }));
+                                                                    Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: <Widget>[
+                                                                        RawMaterialButton(
+                                                                          shape:
+                                                                              CircleBorder(),
+                                                                          elevation:
+                                                                              4.0,
+                                                                          fillColor:
+                                                                              Colors.white,
+                                                                          padding: const EdgeInsets
+                                                                              .all(
+                                                                              15.0),
+                                                                          onPressed:
+                                                                              () {
+                                                                            Navigator.pop(context);
+                                                                          },
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        });
+                                                  }
                                                 } else {
                                                   showDialog(
                                                       context: context,
@@ -908,7 +919,7 @@ class _LoginPageState extends State<LoginPage> {
                                                           content: Text(
                                                               "The passwords do not match"),
                                                           actions: <Widget>[
-                                                            FlatButton(
+                                                            TextButton(
                                                               child:
                                                                   Text("Close"),
                                                               onPressed: () {
@@ -937,13 +948,13 @@ class _LoginPageState extends State<LoginPage> {
                       transitionDuration: Duration(milliseconds: 300),
                       barrierDismissible: false,
                       barrierLabel: '',
-                      pageBuilder: (context, animation1, animation2) {});
+                      pageBuilder: (context, animation1, animation2) => Container());
                 },
                 child: Container(
                   height: 50,
                   width: MediaQuery.of(context).size.width / 3,
                   decoration: BoxDecoration(
-                    color: Colors.amber[300],
+                    color: Colors.amber.shade300,
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                   child: Center(
@@ -969,7 +980,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                   width: MediaQuery.of(context).size.width / 3,
                   decoration: BoxDecoration(
-                    color: Colors.green[300],
+                    color: Colors.green.shade300,
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                   child: Center(
@@ -990,41 +1001,49 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final Firestore _db = Firestore.instance;
-Future<FirebaseUser> googleSignIn() async {
+final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+bool _googleSignInInitialized = false;
+
+Future<void> _ensureGoogleSignInInitialized() async {
+  if (_googleSignInInitialized) return;
+  await GoogleSignIn.instance.initialize();
+  _googleSignInInitialized = true;
+}
+
+Future<User?> googleSignIn() async {
   try {
-    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
-    GoogleSignInAuthentication googleAuth =
-        await googleSignInAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    final AuthResult authResult = await _auth.signInWithCredential(credential);
-    final FirebaseUser user = authResult.user;
-    updateUserData(user);
-    print("user name: ${user.displayName}");
-    print(user);
+    await _ensureGoogleSignInInitialized();
+    final GoogleSignInAccount googleSignInAccount =
+        await GoogleSignIn.instance.authenticate();
+    final String? idToken = googleSignInAccount.authentication.idToken;
+    final AuthCredential credential =
+        GoogleAuthProvider.credential(idToken: idToken);
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
+    final User? user = authResult.user;
+    if (user != null) {
+      await updateUserData(user);
+    }
     return user;
   } catch (error) {
-    return error;
+    return null;
   }
 }
 
-void updateUserData(FirebaseUser user) async {
-  DocumentReference ref = _db
+Future<void> updateUserData(User user) async {
+  final ref = _db
       .collection('users')
-      .document(user.uid)
+      .doc(user.uid)
       .collection("PersonalDetails")
-      .document("Details");
-  return ref.setData({
-    'email': user.email,
-    'imageURL': user.photoUrl,
-    'displayName': user.displayName,
+      .doc("Details");
+  await ref.set({
+    'email': user.email ?? '',
+    'imageURL': user.photoURL ?? '',
+    'displayName': user.displayName ?? '',
     'timeStampOfDateCreated': DateTime.now(),
-  }, merge: true);
+  }, SetOptions(merge: true));
 }
 
 void _settingModalBottomSheet(context) {
@@ -1049,10 +1068,15 @@ void _settingModalBottomSheet(context) {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    RaisedButton(
-                      elevation: 6,
-                      textColor: Colors.black,
-                      color: Colors.white,
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 6,
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
@@ -1065,20 +1089,16 @@ void _settingModalBottomSheet(context) {
                         ),
                       ),
                       onPressed: () async {
-                        googleSignIn().then(
-                          (result) => {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        _handleWindowDisplayGoogle()),
-                                (_) => false),
-                          },
-                        );
+                        final user = await googleSignIn();
+                        if (user != null) {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      handleWindowDisplayGoogle()),
+                              (_) => false);
+                        }
                       },
-                      shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(30.0),
-                      ),
                     ),
                   ],
                 ),
@@ -1090,10 +1110,15 @@ void _settingModalBottomSheet(context) {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Platform.isAndroid
-                        ? RaisedButton(
-                            elevation: 6,
-                            textColor: Colors.white,
-                            color: Colors.black,
+                        ? ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              elevation: 6,
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
                               child: Row(
@@ -1107,9 +1132,6 @@ void _settingModalBottomSheet(context) {
                               ),
                             ),
                             onPressed: () {},
-                            shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0),
-                            ),
                           )
                         : Container()
                   ],
@@ -1121,80 +1143,21 @@ void _settingModalBottomSheet(context) {
       });
 }
 
-Widget _handleWindowDisplayLog() {
-  Future updateExpiryOFinventory() async {
-    print("kush");
-    QuerySnapshot qn = await Firestore.instance
-        .collection("users")
-        .document(userid)
-        .collection("inventory")
-        .getDocuments();
-
-    for (int i = 0; i < qn.documents.length; i++) {
-      DateTime dateTimeNow = DateTime.now();
-      DateTime dateTimeThen =
-          ((qn.documents[i].data['expiringOn']) as Timestamp).toDate();
-      Firestore.instance
-          .collection('users')
-          .document(userid)
-          .collection('inventory')
-          .document(qn.documents[i].data["productName"][0].toUpperCase() +
-              qn.documents[i].data["productName"].substring(1))
-          .updateData({
-        'expiringIn': dateTimeThen.difference(dateTimeNow).inDays,
-      });
-    }
-    int count = 0;
-    for (int i = 0; i < qn.documents.length; i++) {
-      if (qn.documents[i].data["expiringIn"] < 0 ||
-          qn.documents[i].data["quantity"] < 0) {
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection("toDoList")
-            .document("sections")
-            .collection("appToUserTodo")
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .setData({
-          'productName': qn.documents[i].data["productName"],
-          'quantity': 0,
-          'unit': qn.documents[i].data["unit"],
-          'check': false,
-        });
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection('inventory')
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .delete();
-        count++;
-      }
-    }
-    Firestore.instance
-        .collection("users")
-        .document(userid)
-        .collection("PersonalDetails")
-        .document("Details")
-        .updateData({"countOfItems": FieldValue.increment(-count)});
-    count = 0;
-    return qn.documents;
-  }
-
-  return StreamBuilder(
-    stream: FirebaseAuth.instance.onAuthStateChanged,
+Widget _handleWindowDisplayAfterAuth() {
+  return StreamBuilder<User?>(
+    stream: FirebaseAuth.instance.authStateChanges(),
     builder: (BuildContext context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Scaffold(
-            backgroundColor: Colors.grey[800],
+            backgroundColor: Colors.grey.shade800,
             body: Center(
                 child: SpinKitWave(
                     color: Colors.white, type: SpinKitWaveType.start)));
       } else {
-        if (snapshot.hasData) {
-          userid = snapshot.data.uid;
-          updateExpiryOFinventory();
+        final user = snapshot.data;
+        if (user != null) {
+          userid = user.uid;
+          updateExpiryOfInventory();
           return home();
         } else {
           return LoginPage();
@@ -1204,119 +1167,8 @@ Widget _handleWindowDisplayLog() {
   );
 }
 
-Widget _handleWindowDisplayReg() {
-  Future updateExpiryOFinventory() async {
-    print("kush");
-    QuerySnapshot qn = await Firestore.instance
-        .collection("users")
-        .document(userid)
-        .collection("inventory")
-        .getDocuments();
+Widget handleWindowDisplayLog() => _handleWindowDisplayAfterAuth();
 
-    for (int i = 0; i < qn.documents.length; i++) {
-      DateTime dateTimeNow = DateTime.now();
-      DateTime dateTimeThen =
-          ((qn.documents[i].data['expiringOn']) as Timestamp).toDate();
-      Firestore.instance
-          .collection('users')
-          .document(userid)
-          .collection('inventory')
-          .document(qn.documents[i].data["productName"][0].toUpperCase() +
-              qn.documents[i].data["productName"].substring(1))
-          .updateData({
-        'expiringIn': dateTimeThen.difference(dateTimeNow).inDays,
-      });
-    }
-    int count = 0;
-    for (int i = 0; i < qn.documents.length; i++) {
-      if (qn.documents[i].data["expiringIn"] < 0 ||
-          qn.documents[i].data["quantity"] < 0) {
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection("toDoList")
-            .document("sections")
-            .collection("appToUserTodo")
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .setData({
-          'productName': qn.documents[i].data["productName"],
-          'quantity': 0,
-          'unit': qn.documents[i].data["unit"],
-          'check': false,
-        });
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection('inventory')
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .delete();
-        count++;
-      }
-    }
-    Firestore.instance
-        .collection("users")
-        .document(userid)
-        .collection("PersonalDetails")
-        .document("Details")
-        .updateData({"countOfItems": FieldValue.increment(-count)});
-    count = 0;
-    return qn.documents;
-  }
+Widget handleWindowDisplayReg() => _handleWindowDisplayAfterAuth();
 
-  return StreamBuilder(
-    stream: FirebaseAuth.instance.onAuthStateChanged,
-    builder: (BuildContext context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Scaffold(
-            backgroundColor: Colors.grey[800],
-            body: Center(
-                child: SpinKitWave(
-                    color: Colors.white, type: SpinKitWaveType.start)));
-      } else {
-        if (snapshot.hasData) {
-          print("kush1");
-          userid = snapshot.data.uid;
-          updateExpiryOFinventory();
-          return home();
-        } else {
-          return LoginPage();
-        }
-      }
-    },
-  );
-}
-
-Widget _handleWindowDisplayGoogle() {
-  return StreamBuilder(
-    stream: FirebaseAuth.instance.onAuthStateChanged,
-    builder: (BuildContext context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Scaffold(
-            backgroundColor: Colors.grey[800],
-            body: Center(
-                child: SpinKitWave(
-                    color: Colors.white, type: SpinKitWaveType.start)));
-      } else {
-        if (snapshot.hasData) {
-          print(MediaQuery.of(context).size.width / 2.07);
-          userid = snapshot.data.uid;
-          Firestore.instance
-              .collection('users')
-              .document(userid)
-              .collection("PersonalDetails")
-              .document("Details")
-              .updateData({
-            'countOfItems': FieldValue.increment(0),
-            'recipeUploaded': FieldValue.increment(0),
-            'recipeUsed': FieldValue.increment(0),
-          });
-          return home();
-        } else {
-          return LoginPage();
-        }
-      }
-    },
-  );
-}
+Widget handleWindowDisplayGoogle() => _handleWindowDisplayAfterAuth();

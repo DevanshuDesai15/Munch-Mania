@@ -32,7 +32,7 @@ class _snapShotMissingInRecommenderState
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: Icon(
+                  child: FaIcon(
                     FontAwesomeIcons.exclamation,
                     color: Colors.redAccent,
                     size: (MediaQuery.of(context).size.width) / 2,

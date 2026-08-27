@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:food_recommendation/botttomNavigation/home_screen.dart';
 import 'package:food_recommendation/expireyRecommendation/recommendationThroughExpirey.dart';
@@ -16,23 +15,23 @@ class trendingBeverages extends StatefulWidget {
 
 class _trendingBeveragesState extends State<trendingBeverages> {
   var color;
-  var firestore = Firestore.instance
+  var firestore = FirebaseFirestore.instance
       .collection("recipes")
-      .document(dishType)
-      .collection(dishAll);
+      .doc(dishType)
+      .collection(dishAll!);
 
-  Future _trendingBevData, _newlyAddedData;
+  late Future _trendingBevData, _newlyAddedData;
   Future getProfileData() async {
-    QuerySnapshot qn = await firestore.limit(5).getDocuments();
-    return qn.documents;
+    QuerySnapshot qn = await firestore.limit(5).get();
+    return qn.docs;
   }
 
   Future getNewData() async {
     QuerySnapshot qn = await firestore
         .orderBy("timeStampOfDateCreated", descending: true)
         .limit(5)
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   @override
@@ -64,7 +63,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(40)),
-                  color: Colors.blue[300],
+                  color: Colors.blue.shade300,
                   boxShadow: [
                     new BoxShadow(
                       color: Colors.black12,
@@ -106,7 +105,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(40)),
-                        color: Colors.blue[200],
+                        color: Colors.blue.shade200,
                         image: DecorationImage(
                           image: AssetImage("assets/bevrages.jpeg"),
                           fit: BoxFit.cover,
@@ -121,7 +120,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                             end: Alignment.centerLeft,
                             colors: [
                               Colors.white.withOpacity(0.0),
-                              Colors.blue[300],
+                              Colors.blue.shade300,
                             ],
                           ),
                           borderRadius: BorderRadius.only(
@@ -142,7 +141,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                   return Container(
                     child: Center(
                         child: SpinKitWave(
-                            color: Colors.blue[200],
+                            color: Colors.blue.shade200,
                             type: SpinKitWaveType.start)),
                   );
                 } else {
@@ -188,16 +187,16 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                           scrollDirection: Axis.horizontal,
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
-                            if (snapshot.data[index].data["dish"] == "veg") {
+                            if (snapshot.data[index].data()["dish"] == "veg") {
                               color = Colors.green;
-                            } else if (snapshot.data[index].data["dish"] ==
+                            } else if (snapshot.data[index].data()["dish"] ==
                                 "non-veg") {
                               color = Colors.red;
                             } else {
                               color = Colors.green;
                             }
                             return Tooltip(
-                              message: snapshot.data[index].data["name"],
+                              message: snapshot.data[index].data()["name"],
                               child: GestureDetector(
                                 onTap: () =>
                                     navigateToDetail(snapshot.data[index]),
@@ -213,7 +212,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.blue[100],
+                                            color: Colors.blue.shade100,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -226,7 +225,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                   CrossAxisAlignment.start,
                                               children: <Widget>[
                                                 Text(
-                                                  '${snapshot.data[index].data["Ingredients"].length} Ingredients Required',
+                                                  '${snapshot.data[index].data()["Ingredients"].length} Ingredients Required',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -237,7 +236,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                 ),
                                                 Text(
                                                   snapshot.data[index]
-                                                      .data["description"],
+                                                      .data()["description"],
                                                   maxLines: 3,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -281,7 +280,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                     image: DecorationImage(
                                                       image: NetworkImage(
                                                           snapshot.data[index]
-                                                                  .data[
+                                                                  .data()[
                                                               "imageURL"]),
                                                       fit: BoxFit.cover,
                                                       alignment:
@@ -323,7 +322,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                 children: <Widget>[
                                                   Text(
                                                     snapshot.data[index]
-                                                        .data["name"],
+                                                        .data()["name"],
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     style: TextStyle(
@@ -336,7 +335,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                   ),
                                                   Row(
                                                     children: <Widget>[
-                                                      Icon(
+                                                      FaIcon(
                                                         FontAwesomeIcons
                                                             .caretRight,
                                                         size: 20.0,
@@ -345,7 +344,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                       SizedBox(width: 2.0),
                                                       Text(
                                                         snapshot.data[index]
-                                                            .data["cuisine"],
+                                                            .data()["cuisine"],
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                         style: TextStyle(
@@ -426,16 +425,16 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                           scrollDirection: Axis.horizontal,
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
-                            if (snapshot.data[index].data["dish"] == "veg") {
+                            if (snapshot.data[index].data()["dish"] == "veg") {
                               color = Colors.green;
-                            } else if (snapshot.data[index].data["dish"] ==
+                            } else if (snapshot.data[index].data()["dish"] ==
                                 "non-veg") {
                               color = Colors.red;
                             } else {
                               color = Colors.green;
                             }
                             return Tooltip(
-                              message: snapshot.data[index].data["name"],
+                              message: snapshot.data[index].data()["name"],
                               child: GestureDetector(
                                 onTap: () =>
                                     navigateToDetail(snapshot.data[index]),
@@ -451,7 +450,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                           height: 120.0,
                                           width: 210.0,
                                           decoration: BoxDecoration(
-                                            color: Colors.blue[100],
+                                            color: Colors.blue.shade100,
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -464,7 +463,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                   CrossAxisAlignment.start,
                                               children: <Widget>[
                                                 Text(
-                                                  '${snapshot.data[index].data["Ingredients"].length} Ingredients Required',
+                                                  '${snapshot.data[index].data()["Ingredients"].length} Ingredients Required',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -475,7 +474,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                 ),
                                                 Text(
                                                   snapshot.data[index]
-                                                      .data["description"],
+                                                      .data()["description"],
                                                   maxLines: 3,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -519,7 +518,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                     image: DecorationImage(
                                                       image: NetworkImage(
                                                           snapshot.data[index]
-                                                                  .data[
+                                                                  .data()[
                                                               "imageURL"]),
                                                       fit: BoxFit.cover,
                                                       alignment:
@@ -560,8 +559,8 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                     CrossAxisAlignment.start,
                                                 children: <Widget>[
                                                   Text(
-                                                    '${snapshot.data[index].data["name"][0].toUpperCase()}'
-                                                    '${snapshot.data[index].data["name"].substring(1)}',
+                                                    '${snapshot.data[index].data()["name"][0].toUpperCase()}'
+                                                    '${snapshot.data[index].data()["name"].substring(1)}',
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     style: TextStyle(
@@ -574,7 +573,7 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                   ),
                                                   Row(
                                                     children: <Widget>[
-                                                      Icon(
+                                                      FaIcon(
                                                         FontAwesomeIcons
                                                             .caretRight,
                                                         size: 20.0,
@@ -582,8 +581,8 @@ class _trendingBeveragesState extends State<trendingBeverages> {
                                                       ),
                                                       SizedBox(width: 2.0),
                                                       Text(
-                                                        '${snapshot.data[index].data["cuisine"][0].toUpperCase()}'
-                                                        '${snapshot.data[index].data["cuisine"].substring(1)}',
+                                                        '${snapshot.data[index].data()["cuisine"][0].toUpperCase()}'
+                                                        '${snapshot.data[index].data()["cuisine"].substring(1)}',
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                         style: TextStyle(

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 class PageViewIndicator extends StatefulWidget {
   final PageController controller;
   final int itemCount;
-  final Color color;
+  final Color? color;
 
   const PageViewIndicator({
-    Key key,
-    @required this.controller,
-    @required this.itemCount,
+    Key? key,
+    required this.controller,
+    required this.itemCount,
     this.color,
   }) : super(key: key);
 
@@ -42,9 +42,9 @@ class IndicatorPainter extends CustomPainter {
   static const double _smallDot = 4;
   static const double _bigDot = 7;
 
-  IndicatorPainter(this.length, this.currentIndicator,
-      {this.color = Colors.black})
-      : dotPaint = Paint()..color = color;
+  IndicatorPainter(this.length, this.currentIndicator, {Color? color})
+      : color = color ?? Colors.black,
+        dotPaint = Paint()..color = color ?? Colors.black;
 
   @override
   void paint(Canvas canvas, Size size) {

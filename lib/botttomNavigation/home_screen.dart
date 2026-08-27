@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_recommendation/search/searchAppBar.dart';
-import 'package:food_recommendation/widgetBar/searchDish.dart';
 import 'package:food_recommendation/widgetBar/selectedDishesWidget.dart';
 import 'package:food_recommendation/widgetBar/trendingBeverages.dart';
 import 'package:food_recommendation/widgetBar/trendingDesserts.dart';
 import 'package:food_recommendation/widgetBar/trendingDishes.dart';
 
-String dishType;
-String dishAll;
+String? dishType;
+String? dishAll;
 
 class home_screen extends StatefulWidget {
   @override
@@ -32,7 +31,7 @@ class _home_screenState extends State<home_screen> {
     searchAppBar(),
   ];
 
-  List<IconData> _icons = [
+  List<FaIconData> _icons = [
     FontAwesomeIcons.utensils,
     FontAwesomeIcons.glassMartini,
     FontAwesomeIcons.iceCream,
@@ -40,7 +39,7 @@ class _home_screenState extends State<home_screen> {
     FontAwesomeIcons.search,
   ];
 
-  String head;
+  late String head;
 
   @override
   void initState() {
@@ -105,8 +104,8 @@ class _home_screenState extends State<home_screen> {
     );
   }
 
-  var color = Colors.red[100];
-  var colorIcon = Colors.red[500];
+  var color = Colors.red.shade100;
+  var colorIcon = Colors.red.shade500;
 
   Widget _buildIcon(int index) {
     return GestureDetector(
@@ -115,25 +114,25 @@ class _home_screenState extends State<home_screen> {
           _selectedIndex = index;
           head = headingName[index];
           if (index == 0) {
-            color = Colors.red[100];
+            color = Colors.red.shade100;
             colorIcon = Colors.redAccent;
             dishAll = "allFood";
             dishType = "food";
           } else if (index == 1) {
-            color = Colors.blue[100];
+            color = Colors.blue.shade100;
             colorIcon = Colors.blueAccent;
             dishAll = "allBeverages";
             dishType = "drinks";
           } else if (index == 2) {
-            color = Colors.pink[100];
+            color = Colors.pink.shade100;
             colorIcon = Colors.pinkAccent;
             dishAll = "allDessert";
             dishType = "dessert";
           } else if (index == 3) {
-            color = Colors.amber[100];
+            color = Colors.amber.shade100;
             colorIcon = Colors.amberAccent;
           } else if (index == 4) {
-            color = Colors.green[100];
+            color = Colors.green.shade100;
             colorIcon = Colors.green;
           }
         });
@@ -146,7 +145,7 @@ class _home_screenState extends State<home_screen> {
           borderRadius: BorderRadius.circular(30),
         ),
         child: Icon(
-          _icons[index],
+          _icons[index].data,
           size: MediaQuery.of(context).size.width / 15.65,
           color: _selectedIndex == index ? colorIcon : Color(0xFFB4C1C4),
         ),

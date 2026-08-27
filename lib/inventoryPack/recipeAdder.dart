@@ -7,10 +7,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:food_recommendation/main.dart';
 import 'package:image_picker/image_picker.dart';
 
-List<String> myList;
-List<String> myGram;
-List<String> myListConst;
-List<String> myGramConst;
+List<String> myList = [];
+List<String> myGram = [];
+List<String> myListConst = [];
+List<String> myGramConst = [];
 
 class recipeAdder extends StatefulWidget {
   @override
@@ -19,82 +19,84 @@ class recipeAdder extends StatefulWidget {
 
 class _recipeAdderState extends State<recipeAdder> {
   final GlobalKey<FormState> _registerFormKey = GlobalKey<FormState>();
-  GlobalKey<AutoCompleteTextFieldState<String>> key = new GlobalKey();
+  GlobalKey<AutoCompleteTextFieldState<String>> key = GlobalKey();
 
-  TextEditingController recipenameController;
-  TextEditingController descriptionController;
-  TextEditingController cuisineController;
-  TextEditingController imageURLController;
-  TextEditingController prepController;
-  TextEditingController readyController;
-  TextEditingController vegController;
-  TextEditingController servingsController;
-  TextEditingController stepsController;
-  TextEditingController ingredientsController;
-  TextEditingController quantityController;
-  TextEditingController ingredientsStepsController;
+  late TextEditingController recipenameController;
+  late TextEditingController descriptionController;
+  late TextEditingController cuisineController;
+  late TextEditingController imageURLController;
+  late TextEditingController prepController;
+  late TextEditingController readyController;
+  late TextEditingController vegController;
+  late TextEditingController servingsController;
+  late TextEditingController stepsController;
+  late TextEditingController ingredientsController;
+  late TextEditingController quantityController;
+  late TextEditingController ingredientsStepsController;
   List<String> _locations1 = ['grams', 'ml', 'pieces'];
-  String _selectedLocation1;
-  var unitsGrowable = new List<String>();
-  var stepsGrowable = new List<String>();
-  var ingredientsGrowable = new List<String>();
-  var ingredientStepsGrowable = new List<String>();
-  var quantityGrowable = new List<dynamic>();
+  String? _selectedLocation1;
+  var unitsGrowable = <String>[];
+  var stepsGrowable = <String>[];
+  var ingredientsGrowable = <String>[];
+  var ingredientStepsGrowable = <String>[];
+  var quantityGrowable = <dynamic>[];
   List<String> _locations = ['veg', 'non-veg'];
   List<String> _locationsForFood = ['food', 'beverage', 'dessert'];
-  String _selectedLocation;
+  String? _selectedLocation;
   String _selectedUnit = "grams";
-  String _selectedLocationForFood;
-  String typeLoction;
-  String typeLoction2;
+  String? _selectedLocationForFood;
+  String? typeLoction;
+  String? typeLoction2;
   String suffix = " # ";
   String strSteps = "";
   String strUnit = "";
   String strStepss = "";
 
-  final dbref = Firestore.instance;
+  final dbref = FirebaseFirestore.instance;
   int stepCount = 1;
   int ingredientCount = 1;
   int quantityCount = 1;
   int ingredientStepCount = 1;
 
-  File _image;
+  File? _image;
   Future uploadPic(BuildContext context, String abc) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null) return;
     setState(() {
-      _image = image;
+      _image = File(image.path);
       print('image Path$_image');
     });
-    StorageReference firebaseStorageRef =
+    Reference firebaseStorageRef =
         FirebaseStorage.instance.ref().child("houseRecipes").child(userid);
-    StorageUploadTask uploadTask =
-        firebaseStorageRef.child(abc + ".jpg").putFile(_image);
-    var ImageUrl = await (await uploadTask.onComplete).ref.getDownloadURL();
+    UploadTask uploadTask =
+        firebaseStorageRef.child(abc + ".jpg").putFile(_image!);
+    var ImageUrl = await (await uploadTask).ref.getDownloadURL();
     setState(() {
       imageURLController.text = ImageUrl;
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Recipe Image Uploaded Successfully')));
     });
   }
 
-  List<DocumentSnapshot> _products = [];
+  List<QueryDocumentSnapshot> _products = [];
   getProductN() async {
-    Query q = Firestore.instance.collection("getNameProducts");
-    QuerySnapshot querySnapshot = await q.getDocuments();
-    _products = querySnapshot.documents;
+    Query q = FirebaseFirestore.instance.collection("getNameProducts");
+    QuerySnapshot querySnapshot = await q.get();
+    _products = querySnapshot.docs;
     for (int i = 0; i < _products.length; i++) {
-      myList.add(_products[i].data["productName"]);
-      myGram.add(_products[i].data["unit"]);
+      final data = _products[i].data() as Map<String, dynamic>;
+      myList.add(data["productName"]);
+      myGram.add(data["unit"]);
     }
   }
 
   Future getProductName() async {
     QuerySnapshot qn =
-        await Firestore.instance.collection("getNameProducts").getDocuments();
-    return qn.documents;
+        await FirebaseFirestore.instance.collection("getNameProducts").get();
+    return qn.docs;
   }
 
-  Future getProdName;
+  late Future getProdName;
 
   @override
   initState() {
@@ -112,10 +114,10 @@ class _recipeAdderState extends State<recipeAdder> {
     ingredientsStepsController = new TextEditingController();
 
     getProdName = getProductName();
-    myList = List<String>();
-    myGram = List<String>();
-    myListConst = List<String>();
-    myGramConst = List<String>();
+    myList = [];
+    myGram = [];
+    myListConst = [];
+    myGramConst = [];
     getProductN();
 
     super.initState();
@@ -148,7 +150,7 @@ class _recipeAdderState extends State<recipeAdder> {
                           ),
                           controller: recipenameController,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Please enter a valid first name.";
                             } else {
                               return null;
@@ -171,7 +173,7 @@ class _recipeAdderState extends State<recipeAdder> {
                             ),
                             controller: descriptionController,
                             validator: (value) {
-                              if (value.isEmpty) {
+                              if (value == null || value.isEmpty) {
                                 return "Please enter a description";
                               } else {
                                 return null;
@@ -193,7 +195,7 @@ class _recipeAdderState extends State<recipeAdder> {
                           ),
                           controller: cuisineController,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Please enter a valid cuisine";
                             } else {
                               return null;
@@ -217,7 +219,7 @@ class _recipeAdderState extends State<recipeAdder> {
                           controller: prepController,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Please enter a valid time in minutes";
                             } else {
                               return null;
@@ -241,7 +243,7 @@ class _recipeAdderState extends State<recipeAdder> {
                           controller: readyController,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Please enter a valid time in minutes";
                             } else {
                               return null;
@@ -333,7 +335,7 @@ class _recipeAdderState extends State<recipeAdder> {
                           controller: servingsController,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Number of Servings is required";
                             } else if (int.parse(servingsController.text) < 1) {
                               return "Servings cannot be zero or negative";
@@ -455,19 +457,19 @@ class _recipeAdderState extends State<recipeAdder> {
                                       onPressed: () {
                                         if(ingredientsController.text.isEmpty){
                                           final snackBar = SnackBar(content: Text('Please add the ingredient name'),duration: Duration(seconds: 1),backgroundColor: Colors.redAccent,);
-                                          Scaffold.of(context).showSnackBar(snackBar);
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                         }
                                         else if(quantityController.text.isEmpty){
                                           final snackBar = SnackBar(content: Text('Please add the quantity of that ingredient'),duration: Duration(seconds: 1),backgroundColor: Colors.redAccent,);
-                                          Scaffold.of(context).showSnackBar(snackBar);
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                         }
                                         else if(_selectedLocation1==null){
                                           final snackBar = SnackBar(content: Text('Please select the unit.'),duration: Duration(seconds: 1),backgroundColor: Colors.redAccent,);
-                                          Scaffold.of(context).showSnackBar(snackBar);
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                         }
                                         else{
                                           final snackBar = SnackBar(content: Text('${ingredientsController.text} with ${quantityController.text} grams is added!'),duration: Duration(seconds: 1),backgroundColor: Colors.blueAccent,);
-                                          Scaffold.of(context).showSnackBar(snackBar);
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                           ingredientsGrowable.add((ingredientsController.text).toLowerCase());
                                           quantityGrowable.add(int.parse(quantityController.text));
                                           unitsGrowable.add(_selectedLocation1);
@@ -534,8 +536,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                                                 Navigator.pop(context);
                                                                 dialogagain1();
                                                               });
-                                                              Scaffold.of(context)
-                                                                  .showSnackBar(SnackBar(content: Text("$item dismissed")));
+                                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$item dismissed")));
                                                             },
                                                             background: Container(color: Colors.red),
                                                             child: ListTile(
@@ -715,14 +716,16 @@ class _recipeAdderState extends State<recipeAdder> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                RaisedButton(
-                                  shape: RoundedRectangleBorder(
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
                                   ),
-                                  padding: EdgeInsets.all(15),
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightGreenAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
                                   child: Text("Add to Ingredients"),
-                                  color: Colors.lightGreenAccent,
-                                  textColor: Colors.white,
                                   onPressed: () {
                                     if (ingredientsController.text.isEmpty &&
                                         quantityController.text.isEmpty) {
@@ -732,8 +735,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                         duration: Duration(seconds: 1),
                                         backgroundColor: Colors.red,
                                       );
-                                      Scaffold.of(context)
-                                          .showSnackBar(snackBar);
+                                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                     } else if (ingredientsController
                                         .text.isEmpty) {
                                       final snackBar = SnackBar(
@@ -742,8 +744,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                         duration: Duration(seconds: 1),
                                         backgroundColor: Colors.red,
                                       );
-                                      Scaffold.of(context)
-                                          .showSnackBar(snackBar);
+                                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                     } else if (quantityController
                                         .text.isEmpty) {
                                       final snackBar = SnackBar(
@@ -751,8 +752,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                         duration: Duration(seconds: 1),
                                         backgroundColor: Colors.redAccent,
                                       );
-                                      Scaffold.of(context)
-                                          .showSnackBar(snackBar);
+                                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                     } else {
                                       ingredientsGrowable.add(
                                           (ingredientsController.text)
@@ -764,21 +764,22 @@ class _recipeAdderState extends State<recipeAdder> {
                                         duration: Duration(seconds: 1),
                                         backgroundColor: Colors.blueAccent,
                                       );
-                                      Scaffold.of(context)
-                                          .showSnackBar(snackBar);
+                                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                       ingredientsController.clear();
                                       quantityController.clear();
                                     }
                                   },
                                 ),
-                                RaisedButton(
-                                  shape: RoundedRectangleBorder(
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
                                   ),
-                                  padding: EdgeInsets.all(15),
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.yellow,
+                                    foregroundColor: Colors.white,
+                                  ),
                                   child: Text("Edit"),
-                                  color: Colors.yellow,
-                                  textColor: Colors.white,
                                   onPressed: () {
                                     showDialog(
                                         context: context,
@@ -857,8 +858,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                                                 context);
                                                             dialogagain1();
                                                           });
-                                                          Scaffold.of(context)
-                                                              .showSnackBar(SnackBar(
+                                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                                                   content: Text(
                                                                       "$item dismissed")));
                                                         },
@@ -934,14 +934,16 @@ class _recipeAdderState extends State<recipeAdder> {
                                                                                   height: 5,
                                                                                 ),
                                                                                 Flexible(
-                                                                                  child: RaisedButton(
-                                                                                    shape: RoundedRectangleBorder(
+                                                                                  child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                                                                       borderRadius: BorderRadius.circular(24),
                                                                                     ),
-                                                                                    padding: EdgeInsets.all(15),
-                                                                                    child: Text("Edited"),
-                                                                                    color: Colors.lightGreenAccent,
-                                                                                    textColor: Colors.white,
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightGreenAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text("Edited"),
                                                                                     onPressed: () {
                                                                                       if (ingredientsController.text.isEmpty) {
                                                                                       } else if (quantityController.text.isEmpty) {
@@ -1012,14 +1014,16 @@ class _recipeAdderState extends State<recipeAdder> {
                             SizedBox(
                               height: 10,
                             ),
-                            RaisedButton(
-                              shape: RoundedRectangleBorder(
+                            ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              padding: EdgeInsets.all(15),
-                              child: Text("Add to Ingredient Steps"),
-                              color: Colors.lightGreenAccent,
-                              textColor: Colors.white,
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightGreenAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text("Add to Ingredient Steps"),
                               onPressed: () {
                                 if (ingredientsStepsController.text.isEmpty) {
                                   final snackBar = SnackBar(
@@ -1027,7 +1031,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                           Text('Ingredient Step is not added'),
                                       backgroundColor: Colors.redAccent,
                                       duration: Duration(seconds: 1));
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else {
                                   final snackBar = SnackBar(
                                     content: Text(
@@ -1035,7 +1039,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.blueAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                   ingredientStepsGrowable
                                       .add(ingredientsStepsController.text);
                                   strSteps = strSteps +
@@ -1070,28 +1074,30 @@ class _recipeAdderState extends State<recipeAdder> {
                               controller: stepsController,
                             ),
                             SizedBox(height: 10.0),
-                            RaisedButton(
-                              shape: RoundedRectangleBorder(
+                            ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              padding: EdgeInsets.all(15),
-                              child: Text("Add to Steps"),
-                              color: Colors.lightGreenAccent,
-                              textColor: Colors.white,
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightGreenAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text("Add to Steps"),
                               onPressed: () {
                                 if (stepsController.text.isEmpty) {
                                   final snackBar = SnackBar(
                                       content: Text('Step is not added'),
                                       backgroundColor: Colors.redAccent,
                                       duration: Duration(seconds: 1));
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else {
                                   final snackBar = SnackBar(
                                       content: Text(
                                           '${stepsController.text} is added to steps!'),
                                       backgroundColor: Colors.blueAccent,
                                       duration: Duration(seconds: 1));
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                   stepsGrowable.add(stepsController.text);
                                   strStepss =
                                       strStepss + stepsController.text + suffix;
@@ -1113,7 +1119,7 @@ class _recipeAdderState extends State<recipeAdder> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           InkWell(
-                            splashColor: Colors.blueAccent[100],
+                            splashColor: Colors.blueAccent.shade100,
                             child: GestureDetector(
                               onTap: () {
                                 uploadPic(context, recipenameController.text);
@@ -1140,16 +1146,18 @@ class _recipeAdderState extends State<recipeAdder> {
                               ),
                             ),
                           ),
-                          RaisedButton(
-                            shape: RoundedRectangleBorder(
+                          ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            padding: EdgeInsets.all(15),
-                            child: Text("Add To House Recipes"),
-                            color: Colors.lightBlueAccent,
-                            textColor: Colors.white,
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightBlueAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text("Add To House Recipes"),
                             onPressed: () {
-                              if (_registerFormKey.currentState.validate()) {
+                              if (_registerFormKey.currentState!.validate()) {
                                 if (_selectedLocation == null) {
                                   final snackBar = SnackBar(
                                     content: Text(
@@ -1157,7 +1165,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.redAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else if (_selectedLocationForFood == null) {
                                   final snackBar = SnackBar(
                                     content: Text(
@@ -1165,7 +1173,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.redAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else if (ingredientsGrowable.length == 0) {
                                   final snackBar = SnackBar(
                                     content: Text(
@@ -1173,7 +1181,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.redAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else if (ingredientStepsGrowable.length ==
                                     0) {
                                   final snackBar = SnackBar(
@@ -1182,7 +1190,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.redAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else if (stepsGrowable.length == 0) {
                                   final snackBar = SnackBar(
                                     content: Text(
@@ -1190,7 +1198,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.redAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                 } else {
                                   if (_selectedLocationForFood == "beverage") {
                                     typeLoction = "drinks";
@@ -1206,15 +1214,15 @@ class _recipeAdderState extends State<recipeAdder> {
                                   }
                                   dbref
                                       .collection("users")
-                                      .document(userid)
+                                      .doc(userid)
                                       .collection("HouseRecipes")
-                                      .document(typeLoction)
-                                      .collection(typeLoction2)
-                                      .document((recipenameController.text)[0]
+                                      .doc(typeLoction!)
+                                      .collection(typeLoction2!)
+                                      .doc((recipenameController.text)[0]
                                               .toUpperCase() +
                                           recipenameController.text
                                               .substring(1))
-                                      .setData({
+                                      .set({
                                     'name': (recipenameController.text)[0]
                                             .toUpperCase() +
                                         recipenameController.text.substring(1),
@@ -1238,10 +1246,10 @@ class _recipeAdderState extends State<recipeAdder> {
                                   });
                                   dbref
                                       .collection("users")
-                                      .document(userid)
+                                      .doc(userid)
                                       .collection("PersonalDetails")
-                                      .document("Details")
-                                      .updateData({
+                                      .doc("Details")
+                                      .update({
                                     "recipeUploaded": FieldValue.increment(1),
                                   });
                                   strUnit = "";
@@ -1267,7 +1275,7 @@ class _recipeAdderState extends State<recipeAdder> {
                                     duration: Duration(seconds: 1),
                                     backgroundColor: Colors.blueAccent,
                                   );
-                                  Scaffold.of(context).showSnackBar(snackBar);
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                   stepsGrowable.add(stepsController.text);
                                 }
                               }
@@ -1282,7 +1290,7 @@ class _recipeAdderState extends State<recipeAdder> {
         ));
   }
 
-  Widget dialogagain1() {
+  void dialogagain1() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -1334,7 +1342,7 @@ class _recipeAdderState extends State<recipeAdder> {
                             Navigator.pop(context);
                             dialogagain1();
                           });
-                          Scaffold.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text("$item dismissed")));
                         },
                         background: Container(color: Colors.red),
@@ -1417,18 +1425,18 @@ class _recipeAdderState extends State<recipeAdder> {
                                                   ),
                                                 ]),
                                                 Flexible(
-                                                  child: RaisedButton(
-                                                    shape:
-                                                        RoundedRectangleBorder(
+                                                  child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               24),
                                                     ),
-                                                    padding: EdgeInsets.all(15),
-                                                    child: Text("Edited"),
-                                                    color:
-                                                        Colors.lightGreenAccent,
-                                                    textColor: Colors.white,
+                                    padding: EdgeInsets.all(15),
+                                    backgroundColor: Colors.lightGreenAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text("Edited"),
                                                     onPressed: () {
                                                       if (ingredientsController
                                                           .text.isEmpty) {

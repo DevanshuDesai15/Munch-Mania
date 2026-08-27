@@ -8,11 +8,11 @@ class pagination extends StatefulWidget {
 }
 
 class _paginationState extends State<pagination> {
-  Firestore _firestore = Firestore.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<DocumentSnapshot> _products = [];
   bool _loadingProducts = true;
   int _per_page = 20;
-  DocumentSnapshot _lastDocument;
+  DocumentSnapshot? _lastDocument;
   ScrollController _scrollController = ScrollController();
   bool _gettingMoreProducts = false;
   bool _moreProductsAvailable = true;
@@ -20,16 +20,16 @@ class _paginationState extends State<pagination> {
   _getProducts() async {
     Query q = _firestore
         .collection("recipes")
-        .document("food")
+        .doc("food")
         .collection("allFood")
         .orderBy("name")
         .limit(_per_page);
     setState(() {
       _loadingProducts = true;
     });
-    QuerySnapshot querySnapshot = await q.getDocuments();
-    _products = querySnapshot.documents;
-    _lastDocument = querySnapshot.documents[querySnapshot.documents.length - 1];
+    QuerySnapshot querySnapshot = await q.get();
+    _products = querySnapshot.docs;
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     setState(() {
       _loadingProducts = false;
     });
@@ -45,18 +45,19 @@ class _paginationState extends State<pagination> {
       return;
     }
     _gettingMoreProducts = true;
+    final lastData = _lastDocument!.data() as Map<String, dynamic>;
     Query q = _firestore
         .collection("recipes")
-        .document("food")
+        .doc("food")
         .collection("allFood")
         .orderBy("name")
-        .startAfter([_lastDocument.data["name"]]).limit(_per_page);
-    QuerySnapshot querySnapshot = await q.getDocuments();
-    if (querySnapshot.documents.length < _per_page) {
+        .startAfter([lastData["name"]]).limit(_per_page);
+    QuerySnapshot querySnapshot = await q.get();
+    if (querySnapshot.docs.length < _per_page) {
       _moreProductsAvailable = false;
     }
-    _lastDocument = querySnapshot.documents[querySnapshot.documents.length - 1];
-    _products.addAll(querySnapshot.documents);
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    _products.addAll(querySnapshot.docs);
     setState(() {
       _gettingMoreProducts = false;
     });
@@ -100,8 +101,10 @@ class _paginationState extends State<pagination> {
                       controller: _scrollController,
                       itemCount: _products.length,
                       itemBuilder: (BuildContext ctx, int index) {
+                        final data =
+                            _products[index].data() as Map<String, dynamic>;
                         return ListTile(
-                          title: Text(_products[index].data["name"]),
+                          title: Text(data["name"]),
                         );
                       })),
     );

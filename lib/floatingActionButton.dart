@@ -22,7 +22,7 @@ class homefloat extends StatelessWidget {
       shape: CircleBorder(),
       children: [
         SpeedDialChild(
-          child: Icon(FontAwesomeIcons.rss,
+          child: Icon(FontAwesomeIcons.rss.data,
               color: Colors.lightBlueAccent, size: 20),
           backgroundColor: Colors.white,
           label: 'Food Blog',

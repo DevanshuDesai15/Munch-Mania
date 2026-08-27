@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/screens/LoginScreen/loginScreen.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
+
 String userid = "";
 
 class MyApp extends StatelessWidget {
@@ -17,113 +23,99 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: Color(0xFF3EBACE),
-          accentColor: Color(0xFFD8ECF1),
+          colorScheme: ThemeData().colorScheme.copyWith(
+                secondary: Color(0xFFD8ECF1),
+              ),
           scaffoldBackgroundColor: Color(0xFFF3F5F7),
         ),
-        home: _handleWindowDisplay());
+        home: handleWindowDisplay());
   }
 }
 
-Widget _handleWindowDisplay() {
-  PageController _controller = PageController(
-    initialPage: 0,
-  );
+/// Recomputes `expiringIn` for every inventory item from its stored
+/// `expiringOn` timestamp, and moves anything expired (or with a negative
+/// quantity) into the app-generated todo list.
+Future<void> updateExpiryOfInventory() async {
+  QuerySnapshot qn = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(userid)
+      .collection("inventory")
+      .get();
 
-  Future updateExpiryOFinventory() async {
-    print("update");
-    QuerySnapshot qn = await Firestore.instance
-        .collection("users")
-        .document(userid)
-        .collection("inventory")
-        .getDocuments();
+  for (final doc in qn.docs) {
+    final data = doc.data() as Map<String, dynamic>;
+    final DateTime dateTimeNow = DateTime.now();
+    final DateTime dateTimeThen = (data['expiringOn'] as Timestamp).toDate();
+    final String productName = data['productName'] as String;
+    final String docId =
+        productName[0].toUpperCase() + productName.substring(1);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userid)
+        .collection('inventory')
+        .doc(docId)
+        .update({
+      'expiringIn': dateTimeThen.difference(dateTimeNow).inDays,
+    });
+  }
 
-    for (int i = 0; i < qn.documents.length; i++) {
-      DateTime dateTimeNow = DateTime.now();
-      DateTime dateTimeThen =
-          ((qn.documents[i].data['expiringOn']) as Timestamp).toDate();
-      Firestore.instance
+  int count = 0;
+  for (final doc in qn.docs) {
+    final data = doc.data() as Map<String, dynamic>;
+    final int expiringIn = data['expiringIn'] as int? ?? 0;
+    final int quantity = data['quantity'] as int? ?? 0;
+    if (expiringIn < 0 || quantity < 0) {
+      final String productName = data['productName'] as String;
+      final String docId =
+          productName[0].toUpperCase() + productName.substring(1);
+      await FirebaseFirestore.instance
           .collection('users')
-          .document(userid)
+          .doc(userid)
+          .collection("toDoList")
+          .doc("sections")
+          .collection("appToUserTodo")
+          .doc(docId)
+          .set({
+        'productName': productName,
+        'quantity': 0,
+        'unit': data['unit'],
+        'check': false,
+      });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userid)
           .collection('inventory')
-          .document(qn.documents[i].data["productName"][0].toUpperCase() +
-              qn.documents[i].data["productName"].substring(1))
-          .updateData({
-        'expiringIn': dateTimeThen.difference(dateTimeNow).inDays,
-      });
+          .doc(docId)
+          .delete();
+      count++;
     }
-    int count = 0;
-    for (int i = 0; i < qn.documents.length; i++) {
-      if (qn.documents[i].data["expiringIn"] < 0 ||
-          qn.documents[i].data["quantity"] < 0) {
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection("toDoList")
-            .document("sections")
-            .collection("appToUserTodo")
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .setData({
-          'productName': qn.documents[i].data["productName"],
-          'quantity': 0,
-          'unit': qn.documents[i].data["unit"],
-          'check': false,
-        });
-        Firestore.instance
-            .collection('users')
-            .document(userid)
-            .collection('inventory')
-            .document(qn.documents[i].data["productName"][0].toUpperCase() +
-                qn.documents[i].data["productName"].substring(1))
-            .delete();
-        count++;
-      }
-    }
-    Firestore.instance
+  }
+
+  if (count > 0) {
+    await FirebaseFirestore.instance
         .collection("users")
-        .document(userid)
+        .doc(userid)
         .collection("PersonalDetails")
-        .document("Details")
-        .updateData({"countOfItems": FieldValue.increment(-count)});
-    count = 0;
-    return qn.documents;
+        .doc("Details")
+        .update({"countOfItems": FieldValue.increment(-count)});
   }
+}
 
-  void trial() {
-    String str = "chee";
-    String str2 = "Chedar cheese";
-    print(str2.contains(str));
-  }
-
-  /*Future makeGetNameProduct()async{
-    print("getNameProducts");
-    QuerySnapshot qn=await Firestore.instance.collection("products").getDocuments();
-
-    for(int i=0;i<qn.documents.length;i++){
-      Firestore.instance.collection('getNameProducts')
-          .document(qn.documents[i].data["productName"][0].toUpperCase()+qn.documents[i].data["productName"].substring(1))
-          .setData({
-        'productName':qn.documents[i].data["productName"][0].toUpperCase()+qn.documents[i].data["productName"].substring(1),
-        'unit':qn.documents[i].data["unit"],
-      });
-    }
-    return qn.documents;
-  }*/
-
-  return StreamBuilder(
-    stream: FirebaseAuth.instance.onAuthStateChanged,
+Widget handleWindowDisplay() {
+  return StreamBuilder<User?>(
+    stream: FirebaseAuth.instance.authStateChanges(),
     builder: (BuildContext context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Scaffold(
             backgroundColor: Colors.white,
             body: Center(
                 child: SpinKitWave(
-                    color: Colors.amber[300], type: SpinKitWaveType.start)));
+                    color: Colors.amber.shade300, type: SpinKitWaveType.start)));
       } else {
-        if (snapshot.hasData) {
-          userid = snapshot.data.uid;
-          updateExpiryOFinventory();
-          trial();
+        final user = snapshot.data;
+        if (user != null) {
+          userid = user.uid;
+          updateExpiryOfInventory();
           return bottomBar2();
         } else {
           return LoginPage();

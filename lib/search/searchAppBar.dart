@@ -12,7 +12,7 @@ class searchAppBar extends StatefulWidget {
 int _selectedIndex = 0;
 
 class _searchAppBarState extends State<searchAppBar> {
-  List<IconData> _icons = [
+  List<FaIconData> _icons = [
     FontAwesomeIcons.utensils,
     FontAwesomeIcons.glassMartini,
     FontAwesomeIcons.iceCream,
@@ -54,7 +54,7 @@ class _searchAppBarState extends State<searchAppBar> {
     );
   }
 
-  var color = Colors.green[100];
+  var color = Colors.green.shade100;
   var colorIcon = Colors.green;
   var colorText = Colors.green;
   Widget _buildIcon(int index) {
@@ -64,7 +64,7 @@ class _searchAppBarState extends State<searchAppBar> {
         onTap: () {
           setState(() {
             _selectedIndex = index;
-            color = Colors.green[100];
+            color = Colors.green.shade100;
             colorIcon = Colors.green;
             colorText = Colors.green;
           });
@@ -77,7 +77,7 @@ class _searchAppBarState extends State<searchAppBar> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: <Widget>[
-                Icon(
+                FaIcon(
                   _icons[index],
                   size: 20.0,
                   color:

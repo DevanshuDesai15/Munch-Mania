@@ -54,7 +54,7 @@ class _todoAppBarState extends State<todoAppBar> {
     );
   }
 
-  var color = Colors.red[100];
+  var color = Colors.red.shade100;
   var colorText = Colors.red;
   Widget _buildIcon(int index) {
     return Padding(
@@ -63,7 +63,7 @@ class _todoAppBarState extends State<todoAppBar> {
         onTap: () {
           setState(() {
             _selectedIndex = index;
-            color = Colors.red[100];
+            color = Colors.red.shade100;
             colorText = Colors.red;
           });
         },

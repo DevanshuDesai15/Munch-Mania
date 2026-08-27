@@ -1,4 +1,3 @@
-import 'package:cupertino_icons/placeholder.txt';
 import 'package:flutter/material.dart';
 import 'package:food_recommendation/inventoryPack/addininventory.dart';
 import 'package:food_recommendation/inventoryPack/recipeAdder.dart';
@@ -56,7 +55,7 @@ class _appbarSearchInventoryState extends State<appbarSearchInventory> {
     );
   }
 
-  var color = Colors.blue[100];
+  var color = Colors.blue.shade100;
   var colorText = Colors.blueAccent;
   Widget _buildIcon(int index) {
     return Padding(
@@ -65,7 +64,7 @@ class _appbarSearchInventoryState extends State<appbarSearchInventory> {
         onTap: () {
           setState(() {
             _selectedIndex = index;
-            color = Colors.blue[100];
+            color = Colors.blue.shade100;
             colorText = Colors.blueAccent;
           });
         },

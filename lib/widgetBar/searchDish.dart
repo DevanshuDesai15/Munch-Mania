@@ -26,8 +26,8 @@ class _searchDishState extends State<searchDish> {
         value.substring(0, 1).toUpperCase() + value.substring(1);
     if (queryResultSet.length == 0 && value.length == 1) {
       SearchServiceForDishes().searchByName(value).then((QuerySnapshot docs) {
-        for (int i = 0; i < docs.documents.length; ++i) {
-          queryResultSet.add(docs.documents[i].data);
+        for (int i = 0; i < docs.docs.length; ++i) {
+          queryResultSet.add(docs.docs[i].data());
         }
       });
     } else {
@@ -77,13 +77,13 @@ class _searchDishState extends State<searchDish> {
 }
 
 Future abcd(String dishName) async {
-  QuerySnapshot ab = await Firestore.instance
+  QuerySnapshot ab = await FirebaseFirestore.instance
       .collection("recipes")
-      .document("food")
+      .doc("food")
       .collection("allFood")
-      .getDocuments();
+      .get();
   //print("Result : "+ab.data.toString());
-  return ab.documents;
+  return ab.docs;
 }
 
 var color;
@@ -104,14 +104,14 @@ Widget buildResultCard(data, BuildContext context) {
   return new Container(
     child: GestureDetector(
       onTap: () => {
-        Firestore.instance
+        FirebaseFirestore.instance
             .collection('recipes')
-            .document("food")
+            .doc("food")
             .collection("allFood")
             .where("name", isEqualTo: data["name"])
-            .getDocuments()
+            .get()
             .then((QuerySnapshot docs) {
-          navigateToDetail(docs.documents[0]);
+          navigateToDetail(docs.docs[0]);
         })
       }, //navigateToDetail(abcd(data["name"])),
       child: new GridTile(
@@ -177,7 +177,7 @@ Widget buildResultCard(data, BuildContext context) {
                           ),
                           Row(
                             children: <Widget>[
-                              Icon(
+                              FaIcon(
                                 FontAwesomeIcons.caretRight,
                                 size: 20.0,
                                 color: Colors.white,

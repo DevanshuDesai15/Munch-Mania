@@ -5,7 +5,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:food_recommendation/botttomNavigation/home_screen.dart';
 import 'package:food_recommendation/expireyRecommendation/recommendationThroughExpirey.dart';
 import 'package:food_recommendation/foodDetailPgae/detailPage2.dart';
-import 'package:food_recommendation/seeAll/seeAllRecentlyAdded.dart';
 import 'package:food_recommendation/seeAll/seeAllTop.dart';
 
 class trendingDishes extends StatefulWidget {
@@ -14,23 +13,23 @@ class trendingDishes extends StatefulWidget {
 }
 
 class _trendingDishesState extends State<trendingDishes> {
-  var firestore = Firestore.instance
+  var firestore = FirebaseFirestore.instance
       .collection("recipes")
-      .document(dishType)
-      .collection(dishAll);
+      .doc(dishType)
+      .collection(dishAll!);
 
-  Future _trendingDishData, _newlyAddedData;
+  late Future _trendingDishData, _newlyAddedData;
   Future getProfileData() async {
-    QuerySnapshot qn = await firestore.limit(5).getDocuments();
-    return qn.documents;
+    QuerySnapshot qn = await firestore.limit(5).get();
+    return qn.docs;
   }
 
   Future getNewData() async {
     QuerySnapshot qn = await firestore
         .orderBy("timeStampOfDateCreated", descending: true)
         .limit(5)
-        .getDocuments();
-    return qn.documents;
+        .get();
+    return qn.docs;
   }
 
   @override
@@ -63,7 +62,7 @@ class _trendingDishesState extends State<trendingDishes> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(40)),
-                color: Colors.red[300],
+                color: Colors.red.shade300,
                 boxShadow: [
                   new BoxShadow(
                     color: Colors.black12,
@@ -105,7 +104,7 @@ class _trendingDishesState extends State<trendingDishes> {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(10),
                           bottomRight: Radius.circular(40)),
-                      color: Colors.red[300],
+                      color: Colors.red.shade300,
                       image: DecorationImage(
                         image: AssetImage("assets/food2.jpeg"),
                         fit: BoxFit.cover,
@@ -120,7 +119,7 @@ class _trendingDishesState extends State<trendingDishes> {
                           end: Alignment.centerLeft,
                           colors: [
                             Colors.white.withOpacity(0.0),
-                            Colors.red[300],
+                            Colors.red.shade300,
                           ],
                         ),
                         borderRadius: BorderRadius.only(
@@ -191,16 +190,16 @@ class _trendingDishesState extends State<trendingDishes> {
                         scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index) {
-                          if (snapshot.data[index].data["dish"] == "veg") {
+                          if (snapshot.data[index].data()["dish"] == "veg") {
                             color = Colors.green;
-                          } else if (snapshot.data[index].data["dish"] ==
+                          } else if (snapshot.data[index].data()["dish"] ==
                               "non-veg") {
                             color = Colors.red;
                           } else {
                             color = Colors.green;
                           }
                           return Tooltip(
-                            message: snapshot.data[index].data["name"],
+                            message: snapshot.data[index].data()["name"],
                             child: GestureDetector(
                               onTap: () =>
                                   navigateToDetail(snapshot.data[index]),
@@ -216,7 +215,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                         height: 120.0,
                                         width: 210.0,
                                         decoration: BoxDecoration(
-                                          color: Colors.red[200],
+                                          color: Colors.red.shade200,
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),
@@ -229,7 +228,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Text(
-                                                '${snapshot.data[index].data["Ingredients"].length} Ingredients Required',
+                                                '${snapshot.data[index].data()["Ingredients"].length} Ingredients Required',
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   fontSize: 15.0,
@@ -239,7 +238,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                               ),
                                               Text(
                                                 snapshot.data[index]
-                                                    .data["description"],
+                                                    .data()["description"],
                                                 maxLines: 3,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
@@ -282,7 +281,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                   image: DecorationImage(
                                                     image: NetworkImage(snapshot
                                                         .data[index]
-                                                        .data["imageURL"]),
+                                                        .data()["imageURL"]),
                                                     fit: BoxFit.cover,
                                                     alignment:
                                                         Alignment.topCenter,
@@ -324,8 +323,8 @@ class _trendingDishesState extends State<trendingDishes> {
                                                   CrossAxisAlignment.start,
                                               children: <Widget>[
                                                 Text(
-                                                  '${snapshot.data[index].data["name"][0].toUpperCase()}'
-                                                  '${snapshot.data[index].data["name"].substring(1)}',
+                                                  '${snapshot.data[index].data()["name"][0].toUpperCase()}'
+                                                  '${snapshot.data[index].data()["name"].substring(1)}',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -337,7 +336,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                 ),
                                                 Row(
                                                   children: <Widget>[
-                                                    Icon(
+                                                    FaIcon(
                                                       FontAwesomeIcons
                                                           .caretRight,
                                                       size: 20.0,
@@ -345,8 +344,8 @@ class _trendingDishesState extends State<trendingDishes> {
                                                     ),
                                                     SizedBox(width: 2.0),
                                                     Text(
-                                                      '${snapshot.data[index].data["cuisine"][0].toUpperCase()}'
-                                                      '${snapshot.data[index].data["cuisine"].substring(1)}',
+                                                      '${snapshot.data[index].data()["cuisine"][0].toUpperCase()}'
+                                                      '${snapshot.data[index].data()["cuisine"].substring(1)}',
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(
@@ -426,16 +425,16 @@ class _trendingDishesState extends State<trendingDishes> {
                         scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index) {
-                          if (snapshot.data[index].data["dish"] == "veg") {
+                          if (snapshot.data[index].data()["dish"] == "veg") {
                             color = Colors.green;
-                          } else if (snapshot.data[index].data["dish"] ==
+                          } else if (snapshot.data[index].data()["dish"] ==
                               "non-veg") {
                             color = Colors.red;
                           } else {
                             color = Colors.green;
                           }
                           return Tooltip(
-                            message: snapshot.data[index].data["name"],
+                            message: snapshot.data[index].data()["name"],
                             child: GestureDetector(
                               onTap: () =>
                                   navigateToDetail(snapshot.data[index]),
@@ -451,7 +450,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                         height: 120.0,
                                         width: 210.0,
                                         decoration: BoxDecoration(
-                                          color: Colors.amber[100],
+                                          color: Colors.amber.shade100,
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),
@@ -464,7 +463,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Text(
-                                                '${snapshot.data[index].data["Ingredients"].length} Ingredients Required',
+                                                '${snapshot.data[index].data()["Ingredients"].length} Ingredients Required',
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   fontSize: 15.0,
@@ -474,7 +473,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                               ),
                                               Text(
                                                 snapshot.data[index]
-                                                    .data["description"],
+                                                    .data()["description"],
                                                 maxLines: 3,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
@@ -517,7 +516,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                   image: DecorationImage(
                                                     image: NetworkImage(snapshot
                                                         .data[index]
-                                                        .data["imageURL"]),
+                                                        .data()["imageURL"]),
                                                     fit: BoxFit.cover,
                                                     alignment:
                                                         Alignment.topCenter,
@@ -557,8 +556,8 @@ class _trendingDishesState extends State<trendingDishes> {
                                                   CrossAxisAlignment.start,
                                               children: <Widget>[
                                                 Text(
-                                                  '${snapshot.data[index].data["name"][0].toUpperCase()}'
-                                                  '${snapshot.data[index].data["name"].substring(1)}',
+                                                  '${snapshot.data[index].data()["name"][0].toUpperCase()}'
+                                                  '${snapshot.data[index].data()["name"].substring(1)}',
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -570,7 +569,7 @@ class _trendingDishesState extends State<trendingDishes> {
                                                 ),
                                                 Row(
                                                   children: <Widget>[
-                                                    Icon(
+                                                    FaIcon(
                                                       FontAwesomeIcons
                                                           .caretRight,
                                                       size: 20.0,
@@ -578,8 +577,8 @@ class _trendingDishesState extends State<trendingDishes> {
                                                     ),
                                                     SizedBox(width: 2.0),
                                                     Text(
-                                                      '${snapshot.data[index].data["cuisine"][0].toUpperCase()}'
-                                                      '${snapshot.data[index].data["cuisine"].substring(1)}',
+                                                      '${snapshot.data[index].data()["cuisine"][0].toUpperCase()}'
+                                                      '${snapshot.data[index].data()["cuisine"].substring(1)}',
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(

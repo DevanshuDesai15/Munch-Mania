@@ -18,12 +18,12 @@ class _todoFinalListState extends State<todoFinalList> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
+      child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
             .collection("users")
-            .document(userid)
+            .doc(userid)
             .collection("toDoList")
-            .document("sections")
+            .doc("sections")
             .collection("finalTodo")
             .orderBy("check", descending: false)
             .snapshots(),
@@ -36,7 +36,7 @@ class _todoFinalListState extends State<todoFinalList> {
                         color: Colors.redAccent, type: SpinKitWaveType.start)),
               ),
             );
-          } else if (snapshot.data.documents.length == 0) {
+          } else if (snapshot.data!.docs.length == 0) {
             return ListView(
               children: <Widget>[
                 Padding(
@@ -54,7 +54,7 @@ class _todoFinalListState extends State<todoFinalList> {
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.all(50.0),
-                            child: Icon(
+                            child: FaIcon(
                               FontAwesomeIcons.exclamation,
                               color: Colors.redAccent,
                               size: (MediaQuery.of(context).size.width) / 2,
@@ -82,10 +82,10 @@ class _todoFinalListState extends State<todoFinalList> {
           } else {
             return ListView.builder(
                 shrinkWrap: true,
-                itemCount: snapshot.data.documents.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (_, index) {
-                  if (snapshot.data.documents[index].data["check"] == true) {
-                    colorBgOfCheckbox = Colors.red[100];
+                  if (snapshot.data!.docs[index].data()!["check"] == true) {
+                    colorBgOfCheckbox = Colors.red.shade100;
                     colorIconCheckbox = Colors.red;
                   } else {
                     colorBgOfCheckbox = Color(0xFFE7EBEE);
@@ -142,11 +142,11 @@ class _todoFinalListState extends State<todoFinalList> {
                                                     2) -
                                                 50,
                                         child: Text(
-                                          snapshot.data.documents[index]
-                                                  .data["productName"][0]
+                                          snapshot.data!.docs[index]
+                                                  .data()!["productName"][0]
                                                   .toUpperCase() +
-                                              snapshot.data.documents[index]
-                                                  .data["productName"]
+                                              snapshot.data!.docs[index]
+                                                  .data()!["productName"]
                                                   .substring(1),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 2,
@@ -188,8 +188,8 @@ class _todoFinalListState extends State<todoFinalList> {
                                       ),
                                     ),
                                     Text(
-                                      snapshot.data.documents[index]
-                                          .data["quantity"]
+                                      snapshot.data!.docs[index]
+                                          .data()!["quantity"]
                                           .toString(),
                                       style: TextStyle(
                                           fontSize: 20,
@@ -197,7 +197,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                     ),
                                     Text(
                                       snapshot
-                                          .data.documents[index].data["unit"],
+                                          .data!.docs[index].data()!["unit"],
                                       style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w300),
@@ -257,7 +257,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                       SizedBox(height: 5),
                                                       Center(
                                                         child: Text(
-                                                          'Present Quantity: ${snapshot.data.documents[index].data["quantity"].toString()} grams',
+                                                          'Present Quantity: ${snapshot.data!.docs[index].data()!["quantity"].toString()} grams',
                                                           style: TextStyle(
                                                               fontSize: 15,
                                                               fontWeight:
@@ -313,7 +313,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .check,
                                                               color:
@@ -321,30 +321,30 @@ class _todoFinalListState extends State<todoFinalList> {
                                                               size: 25.0,
                                                             ),
                                                             onPressed: () {
-                                                              Firestore.instance
+                                                              FirebaseFirestore.instance
                                                                   .collection(
                                                                       'users')
-                                                                  .document(
+                                                                  .doc(
                                                                       userid)
                                                                   .collection(
                                                                       'toDoList')
-                                                                  .document(snapshot
-                                                                          .data
-                                                                          .documents[
+                                                                  .doc(snapshot
+                                                                          .data!
+                                                                          .docs[
                                                                               index]
-                                                                          .data["productName"]
+                                                                          .data()!["productName"]
                                                                               [
                                                                               0]
                                                                           .toUpperCase() +
                                                                       snapshot
-                                                                          .data
-                                                                          .documents[
+                                                                          .data!
+                                                                          .docs[
                                                                               index]
-                                                                          .data[
+                                                                          .data()![
                                                                               "productName"]
                                                                           .substring(
                                                                               1))
-                                                                  .updateData({
+                                                                  .update({
                                                                 'quantity': int.parse(
                                                                     quantityController
                                                                         .text),
@@ -364,7 +364,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .times,
                                                               color:
@@ -411,42 +411,42 @@ class _todoFinalListState extends State<todoFinalList> {
                                     ),
                                   ),
                                   onTap: () {
-                                    if (snapshot.data.documents[index]
-                                            .data["check"] ==
+                                    if (snapshot.data!.docs[index]
+                                            .data()!["check"] ==
                                         true) {
-                                      Firestore.instance
+                                      FirebaseFirestore.instance
                                           .collection("users")
-                                          .document(userid)
+                                          .doc(userid)
                                           .collection("toDoList")
-                                          .document("sections")
+                                          .doc("sections")
                                           .collection("finalTodo")
-                                          .document((snapshot
-                                                      .data
-                                                      .documents[index]
-                                                      .data["productName"])[0]
+                                          .doc((snapshot
+                                                      .data!
+                                                      .docs[index]
+                                                      .data()!["productName"])[0]
                                                   .toUpperCase() +
-                                              snapshot.data.documents[index]
-                                                  .data["productName"]
+                                              snapshot.data!.docs[index]
+                                                  .data()!["productName"]
                                                   .substring(1))
-                                          .updateData({
+                                          .update({
                                         "check": false,
                                       });
                                     } else {
-                                      Firestore.instance
+                                      FirebaseFirestore.instance
                                           .collection("users")
-                                          .document(userid)
+                                          .doc(userid)
                                           .collection("toDoList")
-                                          .document("sections")
+                                          .doc("sections")
                                           .collection("finalTodo")
-                                          .document((snapshot
-                                                      .data
-                                                      .documents[index]
-                                                      .data["productName"])[0]
+                                          .doc((snapshot
+                                                      .data!
+                                                      .docs[index]
+                                                      .data()!["productName"])[0]
                                                   .toUpperCase() +
-                                              snapshot.data.documents[index]
-                                                  .data["productName"]
+                                              snapshot.data!.docs[index]
+                                                  .data()!["productName"]
                                                   .substring(1))
-                                          .updateData({
+                                          .update({
                                         "check": true,
                                       });
                                       showDialog(
@@ -496,7 +496,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .check,
                                                               color:
@@ -504,24 +504,24 @@ class _todoFinalListState extends State<todoFinalList> {
                                                               size: 25.0,
                                                             ),
                                                             onPressed: () {
-                                                              Firestore.instance
+                                                              FirebaseFirestore.instance
                                                                   .collection(
                                                                       "users")
-                                                                  .document(
+                                                                  .doc(
                                                                       userid)
                                                                   .collection(
                                                                       "toDoList")
-                                                                  .document(
+                                                                  .doc(
                                                                       "sections")
                                                                   .collection(
                                                                       "finalTodo")
-                                                                  .document((snapshot.data.documents[index].data["productName"])[0]
+                                                                  .doc((snapshot.data!.docs[index].data()!["productName"])[0]
                                                                           .toUpperCase() +
                                                                       snapshot
-                                                                          .data
-                                                                          .documents[
+                                                                          .data!
+                                                                          .docs[
                                                                               index]
-                                                                          .data[
+                                                                          .data()![
                                                                               "productName"]
                                                                           .substring(
                                                                               1))
@@ -540,7 +540,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                             padding:
                                                                 const EdgeInsets
                                                                     .all(15.0),
-                                                            child: new Icon(
+                                                            child: new FaIcon(
                                                               FontAwesomeIcons
                                                                   .times,
                                                               color:
@@ -602,7 +602,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                           children: <Widget>[
                                             Center(
                                               child: Text(
-                                                "Want to remove ${snapshot.data.documents[index].data["productName"]} from final list",
+                                                "Want to remove ${snapshot.data!.docs[index].data()!["productName"]} from final list",
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -623,38 +623,38 @@ class _todoFinalListState extends State<todoFinalList> {
                                                       Colors.lightBlueAccent,
                                                   padding: const EdgeInsets.all(
                                                       15.0),
-                                                  child: new Icon(
+                                                  child: new FaIcon(
                                                     FontAwesomeIcons.check,
                                                     color: Colors.white,
                                                     size: 25.0,
                                                   ),
                                                   onPressed: () {
-                                                    Firestore.instance
+                                                    FirebaseFirestore.instance
                                                         .collection("users")
-                                                        .document(userid)
+                                                        .doc(userid)
                                                         .collection("toDoList")
-                                                        .document("sections")
+                                                        .doc("sections")
                                                         .collection("finalTodo")
-                                                        .document(snapshot
-                                                                .data
-                                                                .documents[
+                                                        .doc(snapshot
+                                                                .data!
+                                                                .docs[
                                                                     index]
-                                                                .data[
+                                                                .data()![
                                                                     "productName"]
                                                                     [0]
                                                                 .toUpperCase() +
                                                             snapshot
-                                                                .data
-                                                                .documents[
+                                                                .data!
+                                                                .docs[
                                                                     index]
-                                                                .data[
+                                                                .data()![
                                                                     "productName"]
                                                                 .substring(1))
                                                         .delete();
                                                     Navigator.pop(context);
                                                     /*Flushbar(
                                                       backgroundColor: Colors.redAccent,
-                                                      message: 'Removed "${snapshot.data[index].data["productName"]}" from your Recipe List',
+                                                      message: 'Removed "${snapshot.data()![index].data()!["productName"]}" from your Recipe List',
                                                       duration: Duration(seconds: 1),
                                                     )..show(context);*/
                                                   },
@@ -665,7 +665,7 @@ class _todoFinalListState extends State<todoFinalList> {
                                                   fillColor: Colors.redAccent,
                                                   padding: const EdgeInsets.all(
                                                       15.0),
-                                                  child: new Icon(
+                                                  child: new FaIcon(
                                                     FontAwesomeIcons.times,
                                                     color: Colors.white,
                                                     size: 25.0,
