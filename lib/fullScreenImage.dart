@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:food_recommendation/botttomNavigation/profile2.dart';
@@ -34,23 +33,18 @@ class _fullScreenImageState extends State<fullScreenImage> {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     cacheImageUrl = "";
-                    FirebaseStorage.instance
-                        .ref()
-                        .child("UserProfilePhoto")
-                        .child(userid + ".jpg")
-                        .delete();
-                    FirebaseFirestore.instance
-                        .collection("users")
-                        .doc(userid)
-                        .collection("PersonalDetails")
-                        .doc("Details")
-                        .update({
-                      'imageURL': "",
-                    });
                   });
+                  await FirebaseStorage.instance
+                      .ref()
+                      .child("UserProfilePhoto")
+                      .child(userid + ".jpg")
+                      .delete();
+                  await supabase
+                      .from('profiles')
+                      .update({'image_url': ''}).eq('id', userid);
                   Navigator.pop(context);
                 },
                 child: Icon(

@@ -1,13 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:food_recommendation/Validations/validator.dart';
 import 'package:food_recommendation/screens/Home/home.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+/// The Web OAuth client ID from the original Firebase project
+/// (google-services.json), reused as the ID-token audience for Supabase's
+/// Google auth provider.
+const _googleServerClientId =
+    '279528714515-0o6736e1aeu80fhn3gk59ntt00qj35vl.apps.googleusercontent.com';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -43,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
   late TextEditingController confirmPwdInputController;
 
   Future<void> resetPassword(String email) async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    await supabase.auth.resetPasswordForEmail(email);
   }
 
   @override
@@ -268,9 +273,8 @@ class _LoginPageState extends State<LoginPage> {
                                                       .currentState!
                                                       .validate()) {
                                                     try {
-                                                      await FirebaseAuth
-                                                          .instance
-                                                          .signInWithEmailAndPassword(
+                                                      await supabase.auth
+                                                          .signInWithPassword(
                                                               email:
                                                                   emailInputController
                                                                       .text,
@@ -794,37 +798,33 @@ class _LoginPageState extends State<LoginPage> {
                                                     confirmPwdInputController
                                                         .text) {
                                                   try {
-                                                    final currentUser =
-                                                        await FirebaseAuth
-                                                            .instance
-                                                            .createUserWithEmailAndPassword(
-                                                                email:
-                                                                    emailInput1Controller
-                                                                        .text,
-                                                                password:
-                                                                    pwdInput1Controller
-                                                                        .text);
-                                                    await FirebaseFirestore
-                                                        .instance
-                                                        .collection("users")
-                                                        .doc(currentUser.user!
-                                                            .uid)
-                                                        .collection(
-                                                            "PersonalDetails")
-                                                        .doc("Details")
-                                                        .set({
-                                                      'displayName':
+                                                    final authResponse =
+                                                        await supabase.auth
+                                                            .signUp(
+                                                      email:
+                                                          emailInput1Controller
+                                                              .text,
+                                                      password:
+                                                          pwdInput1Controller
+                                                              .text,
+                                                    );
+                                                    final newUser =
+                                                        authResponse.user;
+                                                    if (newUser == null) {
+                                                      throw Exception(
+                                                          'Sign up did not return a user');
+                                                    }
+                                                    await supabase
+                                                        .from('profiles')
+                                                        .upsert({
+                                                      'id': newUser.id,
+                                                      'display_name':
                                                           firstNameInputController
                                                               .text,
-                                                      'recipeUsed': 0,
-                                                      'recipeUploaded': 0,
-                                                      'countOfItems': 0,
-                                                      'timeStampOfDateCreated':
-                                                          DateTime.now(),
-                                                      'imageURL': "",
                                                       'email':
                                                           emailInput1Controller
                                                               .text,
+                                                      'image_url': '',
                                                     });
                                                     Navigator
                                                         .pushAndRemoveUntil(
@@ -1001,14 +1001,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final FirebaseFirestore _db = FirebaseFirestore.instance;
-
 bool _googleSignInInitialized = false;
 
 Future<void> _ensureGoogleSignInInitialized() async {
   if (_googleSignInInitialized) return;
-  await GoogleSignIn.instance.initialize();
+  await GoogleSignIn.instance
+      .initialize(serverClientId: _googleServerClientId);
   _googleSignInInitialized = true;
 }
 
@@ -1018,10 +1016,13 @@ Future<User?> googleSignIn() async {
     final GoogleSignInAccount googleSignInAccount =
         await GoogleSignIn.instance.authenticate();
     final String? idToken = googleSignInAccount.authentication.idToken;
-    final AuthCredential credential =
-        GoogleAuthProvider.credential(idToken: idToken);
-    final UserCredential authResult =
-        await _auth.signInWithCredential(credential);
+    if (idToken == null) {
+      throw Exception('Google sign-in did not return an ID token');
+    }
+    final AuthResponse authResult = await supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+    );
     final User? user = authResult.user;
     if (user != null) {
       await updateUserData(user);
@@ -1033,17 +1034,12 @@ Future<User?> googleSignIn() async {
 }
 
 Future<void> updateUserData(User user) async {
-  final ref = _db
-      .collection('users')
-      .doc(user.uid)
-      .collection("PersonalDetails")
-      .doc("Details");
-  await ref.set({
+  await supabase.from('profiles').upsert({
+    'id': user.id,
     'email': user.email ?? '',
-    'imageURL': user.photoURL ?? '',
-    'displayName': user.displayName ?? '',
-    'timeStampOfDateCreated': DateTime.now(),
-  }, SetOptions(merge: true));
+    'image_url': user.userMetadata?['avatar_url'] ?? '',
+    'display_name': user.userMetadata?['full_name'] ?? user.email ?? '',
+  });
 }
 
 void _settingModalBottomSheet(context) {
@@ -1144,8 +1140,10 @@ void _settingModalBottomSheet(context) {
 }
 
 Widget _handleWindowDisplayAfterAuth() {
-  return StreamBuilder<User?>(
-    stream: FirebaseAuth.instance.authStateChanges(),
+  return StreamBuilder<AuthState>(
+    stream: supabase.auth.onAuthStateChange,
+    initialData:
+        AuthState(AuthChangeEvent.initialSession, supabase.auth.currentSession),
     builder: (BuildContext context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Scaffold(
@@ -1154,9 +1152,10 @@ Widget _handleWindowDisplayAfterAuth() {
                 child: SpinKitWave(
                     color: Colors.white, type: SpinKitWaveType.start)));
       } else {
-        final user = snapshot.data;
+        final user = snapshot.data?.session?.user;
         if (user != null) {
-          userid = user.uid;
+          userid = user.id;
+          ensureProfileExists(user);
           updateExpiryOfInventory();
           return home();
         } else {

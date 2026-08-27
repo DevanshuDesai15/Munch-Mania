@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/screens/LoginScreen/loginScreen.dart';
+
+const supabaseUrl = 'https://wzbsfgadgvzmaorkcyfb.supabase.co';
+const supabaseAnonKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6YnNmZ2FkZ3Z6bWFvcmtjeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NzU1MDUsImV4cCI6MjEwMzM1MTUwNX0.YPrY0YYergSunUiriqb6ASzSnS2yxAFjiQ2kTQsM48U';
+
+SupabaseClient get supabase => Supabase.instance.client;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(MyApp());
 }
 
@@ -101,9 +108,30 @@ Future<void> updateExpiryOfInventory() async {
   }
 }
 
+/// Creates the caller's `profiles` row if it doesn't exist yet. Signing up
+/// writes this eagerly, but when Supabase email confirmation is enabled the
+/// signup response has no active session yet (RLS blocks that insert), so
+/// this is the fallback that fires the moment a real session exists.
+Future<void> ensureProfileExists(User user) async {
+  final existing = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+  if (existing != null) return;
+
+  await supabase.from('profiles').upsert({
+    'id': user.id,
+    'display_name': user.userMetadata?['full_name'] ?? user.email ?? '',
+    'email': user.email ?? '',
+    'image_url': user.userMetadata?['avatar_url'] ?? '',
+  });
+}
+
 Widget handleWindowDisplay() {
-  return StreamBuilder<User?>(
-    stream: FirebaseAuth.instance.authStateChanges(),
+  return StreamBuilder<AuthState>(
+    stream: supabase.auth.onAuthStateChange,
+    initialData: AuthState(AuthChangeEvent.initialSession, supabase.auth.currentSession),
     builder: (BuildContext context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Scaffold(
@@ -112,9 +140,10 @@ Widget handleWindowDisplay() {
                 child: SpinKitWave(
                     color: Colors.amber.shade300, type: SpinKitWaveType.start)));
       } else {
-        final user = snapshot.data;
+        final user = snapshot.data?.session?.user;
         if (user != null) {
-          userid = user.uid;
+          userid = user.id;
+          ensureProfileExists(user);
           updateExpiryOfInventory();
           return bottomBar2();
         } else {

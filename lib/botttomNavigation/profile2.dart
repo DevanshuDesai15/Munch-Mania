@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:food_recommendation/Validations/validator.dart';
 import 'package:food_recommendation/botttomNavigation/bottomBar2.dart';
 import 'package:food_recommendation/botttomNavigation/home_screen.dart';
@@ -54,7 +53,7 @@ class _profile2State extends State<profile2> {
 
   @override
   Future<void> resetPassword(String email) async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    await supabase.auth.resetPasswordForEmail(email);
   }
 
   Future uploadPic(BuildContext context) async {
@@ -72,15 +71,12 @@ class _profile2State extends State<profile2> {
         firebaseStorageRef.child(userid + ".jpg").putFile(_image!);
     final snapshot = await uploadTask;
     var ImageUrl = await snapshot.ref.getDownloadURL();
+    await supabase
+        .from('profiles')
+        .update({'image_url': ImageUrl}).eq('id', userid);
     setState(() {
       print("Profile Picture uploaded");
       prof = getProfileData();
-      FirebaseFirestore.instance
-          .collection("users")
-          .doc(userid)
-          .collection("PersonalDetails")
-          .doc("Details")
-          .update({"imageURL": ImageUrl});
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           'Profile Picture Uploaded',
@@ -96,13 +92,8 @@ class _profile2State extends State<profile2> {
 
   late Future prof;
   var fn, ln;
-  Future getProfileData() async {
-    QuerySnapshot qn = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userid)
-        .collection("PersonalDetails")
-        .get();
-    return qn.docs;
+  Future<Map<String, dynamic>> getProfileData() async {
+    return await supabase.from('profiles').select().eq('id', userid).single();
   }
 
   @override
@@ -380,7 +371,7 @@ class _profile2State extends State<profile2> {
                           ),
                         ),
                         onTap: () {
-                          FirebaseAuth.instance.signOut().then((value) {
+                          supabase.auth.signOut().then((value) {
                             Navigator.of(context).pop();
                             Navigator.push(
                                 context,
@@ -601,8 +592,8 @@ class _profile2State extends State<profile2> {
                             type: SpinKitWaveType.start)),
                   );
                 } else {
-                  passemailController.text = snapshot.data[0].data()["email"];
-                  cacheImageUrl = snapshot.data[0].data()["imageURL"];
+                  passemailController.text = snapshot.data["email"];
+                  cacheImageUrl = snapshot.data["image_url"];
                   return Container(
                     color: bgColor,
                     child: ListView(
@@ -687,8 +678,8 @@ class _profile2State extends State<profile2> {
                         SizedBox(height: 15.0),
                         Center(
                           child: Text(
-                            '${snapshot.data[0].data()["displayName"][0].toUpperCase()}'
-                            '${snapshot.data[0].data()["displayName"].substring(1)}',
+                            '${snapshot.data["display_name"][0].toUpperCase()}'
+                            '${snapshot.data["display_name"].substring(1)}',
                             style: TextStyle(
                                 color: textColor,
                                 fontSize: 25.0,
@@ -698,7 +689,7 @@ class _profile2State extends State<profile2> {
                         SizedBox(height: 5.0),
                         Center(
                           child: Text(
-                            snapshot.data[0].data()["email"],
+                            snapshot.data["email"],
                             style: TextStyle(
                                 color: textColor,
                                 fontSize: 12.0,
@@ -715,7 +706,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data()["recipeUsed"]
+                                        snapshot.data["recipe_used"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
@@ -741,7 +732,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data()["recipeUploaded"]
+                                        snapshot.data["recipe_uploaded"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
@@ -767,7 +758,7 @@ class _profile2State extends State<profile2> {
                                 child: Column(
                                   children: <Widget>[
                                     Text(
-                                        snapshot.data[0].data()["countOfItems"]
+                                        snapshot.data["count_of_items"]
                                             .toString(),
                                         style: TextStyle(
                                             color: textColor,
