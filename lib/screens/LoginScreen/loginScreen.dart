@@ -8,11 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-/// The Web OAuth client ID from the original Firebase project
-/// (google-services.json), reused as the ID-token audience for Supabase's
-/// Google auth provider.
+/// Web OAuth client ID (Google Cloud Console > APIs & Services >
+/// Credentials), used as the ID-token audience for Supabase's Google auth
+/// provider. Must match the Client ID entered in the Supabase dashboard.
 const _googleServerClientId =
-    '279528714515-0o6736e1aeu80fhn3gk59ntt00qj35vl.apps.googleusercontent.com';
+    '507664265448-qe121r1j7jvbtv0lug5bm79g61c77s2f.apps.googleusercontent.com';
 
 class LoginPage extends StatefulWidget {
   @override
