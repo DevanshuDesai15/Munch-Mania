@@ -704,7 +704,8 @@ class _profile2State extends State<profile2> {
                             Container(
                               height: 105,
                               child: Padding(
-                                padding: const EdgeInsets.all(20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0, vertical: 8.0),
                                 child: Column(
                                   children: <Widget>[
                                     Text(
@@ -730,7 +731,8 @@ class _profile2State extends State<profile2> {
                             Container(
                               height: 105,
                               child: Padding(
-                                padding: const EdgeInsets.all(20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0, vertical: 8.0),
                                 child: Column(
                                   children: <Widget>[
                                     Text(
@@ -756,7 +758,8 @@ class _profile2State extends State<profile2> {
                             Container(
                               height: 105,
                               child: Padding(
-                                padding: const EdgeInsets.all(20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0, vertical: 8.0),
                                 child: Column(
                                   children: <Widget>[
                                     Text(
