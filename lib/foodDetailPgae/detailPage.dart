@@ -138,7 +138,7 @@ class _detailPageState extends State<detailPage> {
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Icon(
+                                        child: FaIcon(
                                           dishIcon,
                                           color: iconColor,
                                           size: 27,

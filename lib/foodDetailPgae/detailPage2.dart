@@ -129,7 +129,7 @@ class _UserProfilePageState extends State<detailPage2> {
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Icon(
+                                        child: FaIcon(
                                           dishIcon,
                                           color: iconColor,
                                           size: 27,

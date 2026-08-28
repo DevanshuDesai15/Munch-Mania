@@ -45,7 +45,7 @@ class _inventoryList2State extends State<inventoryList2> {
                             type: SpinKitWaveType.start)),
                   ),
                 );
-              } else if (snapshot.data!.length == 0) {
+              } else if (snapshot.data == null || snapshot.data!.length == 0) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(children: <Widget>[

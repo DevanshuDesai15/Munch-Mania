@@ -33,7 +33,7 @@ class _todoAppToUserState extends State<todoAppToUser> {
                         color: Colors.redAccent, type: SpinKitWaveType.start)),
               ),
             );
-          } else if (snapshot.data!.length == 0) {
+          } else if (snapshot.data == null || snapshot.data!.length == 0) {
             return ListView(
               children: <Widget>[
                 Padding(
