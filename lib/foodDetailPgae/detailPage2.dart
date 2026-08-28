@@ -372,7 +372,8 @@ class _UserProfilePageState extends State<detailPage2> {
                 Container(
                   height: 105,
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 8.0),
                     child: Column(
                       children: <Widget>[
                         Text(data["prep_time"].toString(),
@@ -396,7 +397,8 @@ class _UserProfilePageState extends State<detailPage2> {
                 Container(
                   height: 105,
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 8.0),
                     child: Column(
                       children: <Widget>[
                         Text(data["ready_time"].toString(),
@@ -420,7 +422,8 @@ class _UserProfilePageState extends State<detailPage2> {
                 Container(
                   height: 105,
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 8.0),
                     child: Column(
                       children: <Widget>[
                         Text(data["ingredients"].length.toString(),
