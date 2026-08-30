@@ -29,7 +29,7 @@ class _selectedDishesState extends State<selectedDishes> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(130.0),
+        preferredSize: Size.fromHeight(165.0),
         child: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.white70,
