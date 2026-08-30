@@ -612,7 +612,10 @@ class _UserProfilePageState extends State<detailPage2> {
                             pageBuilder: (BuildContext context,
                                 Animation animation,
                                 Animation secondAnimation) {
-                              return Center(
+                              return Stack(
+                                alignment: Alignment.topCenter,
+                                children: <Widget>[
+                                Center(
                                 child: Container(
                                   width: MediaQuery.of(context).size.width - 40,
                                   height:
@@ -746,7 +749,30 @@ class _UserProfilePageState extends State<detailPage2> {
                                         }),
                                   ),
                                 ),
-                              );
+                              ),
+                              Positioned(
+                                top: 40,
+                                right: 20,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.black.withOpacity(.6),
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ],
+                            );
                             });
                       }),
                 ],

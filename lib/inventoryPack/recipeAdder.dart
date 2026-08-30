@@ -1209,67 +1209,87 @@ class _recipeAdderState extends State<recipeAdder> {
                                       "dessert") {
                                     typeLoction = "dessert";
                                   }
-                                  await supabase.from('house_recipes').insert({
-                                    'user_id': userid,
-                                    'category': typeLoction,
-                                    'name': (recipenameController.text)[0]
-                                            .toUpperCase() +
-                                        recipenameController.text.substring(1),
-                                    'description': descriptionController.text,
-                                    'image_url': imageURLController.text,
-                                    'prep_time': int.parse(prepController.text),
-                                    'ready_time':
-                                        int.parse(readyController.text),
-                                    'search_key': (recipenameController.text)[0]
-                                        .toUpperCase(),
-                                    'type': _selectedLocationForFood,
-                                    'dish': _selectedLocation,
-                                    'cuisine': cuisineController.text,
-                                    'serving':
-                                        int.parse(servingsController.text),
-                                    'ingredients': ingredientsGrowable,
-                                    'ingredient_quantity': quantityGrowable,
-                                    'ingredient_steps': strSteps,
-                                    'unit_new': strUnit,
-                                    'steps': strStepss,
-                                  });
-                                  final profile = await supabase
-                                      .from('profiles')
-                                      .select('recipe_uploaded')
-                                      .eq('id', userid)
-                                      .single();
-                                  final currentRecipeUploaded =
-                                      (profile['recipe_uploaded'] as int?) ??
-                                          0;
-                                  await supabase.from('profiles').update({
-                                    'recipe_uploaded':
-                                        currentRecipeUploaded + 1,
-                                  }).eq('id', userid);
-                                  strUnit = "";
-                                  strSteps = "";
-                                  strStepss = "";
-                                  recipenameController.clear();
-                                  descriptionController.clear();
-                                  cuisineController.clear();
-                                  imageURLController.clear();
-                                  prepController.clear();
-                                  readyController.clear();
-                                  servingsController.clear();
-                                  vegController.clear();
-                                  quantityGrowable.clear();
-                                  ingredientsGrowable.clear();
-                                  stepCount = 1;
-                                  ingredientCount = 1;
-                                  quantityCount = 1;
-                                  ingredientStepCount = 1;
-                                  final snackBar = SnackBar(
-                                    content: Text(
-                                        'Recipe has been Added to your house recipes'),
-                                    duration: Duration(seconds: 1),
-                                    backgroundColor: Colors.blueAccent,
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                                  stepsGrowable.add(stepsController.text);
+                                  try {
+                                    await supabase
+                                        .from('house_recipes')
+                                        .insert({
+                                      'user_id': userid,
+                                      'category': typeLoction,
+                                      'name': (recipenameController.text)[0]
+                                              .toUpperCase() +
+                                          recipenameController.text
+                                              .substring(1),
+                                      'description':
+                                          descriptionController.text,
+                                      'image_url': imageURLController.text,
+                                      'prep_time':
+                                          int.parse(prepController.text),
+                                      'ready_time':
+                                          int.parse(readyController.text),
+                                      'search_key':
+                                          (recipenameController.text)[0]
+                                              .toUpperCase(),
+                                      'type': _selectedLocationForFood,
+                                      'dish': _selectedLocation,
+                                      'cuisine': cuisineController.text,
+                                      'serving':
+                                          int.parse(servingsController.text),
+                                      'ingredients': ingredientsGrowable,
+                                      'ingredient_quantity': quantityGrowable,
+                                      'ingredient_steps': strSteps,
+                                      'unit_new': strUnit,
+                                      'steps': strStepss,
+                                    });
+                                    final profile = await supabase
+                                        .from('profiles')
+                                        .select('recipe_uploaded')
+                                        .eq('id', userid)
+                                        .single();
+                                    final currentRecipeUploaded =
+                                        (profile['recipe_uploaded'] as int?) ??
+                                            0;
+                                    await supabase.from('profiles').update({
+                                      'recipe_uploaded':
+                                          currentRecipeUploaded + 1,
+                                    }).eq('id', userid);
+                                    strUnit = "";
+                                    strSteps = "";
+                                    strStepss = "";
+                                    recipenameController.clear();
+                                    descriptionController.clear();
+                                    cuisineController.clear();
+                                    imageURLController.clear();
+                                    prepController.clear();
+                                    readyController.clear();
+                                    servingsController.clear();
+                                    vegController.clear();
+                                    quantityGrowable.clear();
+                                    ingredientsGrowable.clear();
+                                    stepCount = 1;
+                                    ingredientCount = 1;
+                                    quantityCount = 1;
+                                    ingredientStepCount = 1;
+                                    final snackBar = SnackBar(
+                                      content: Text(
+                                          'Recipe has been Added to your house recipes'),
+                                      duration: Duration(seconds: 1),
+                                      backgroundColor: Colors.blueAccent,
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snackBar);
+                                    stepsGrowable.add(stepsController.text);
+                                  } catch (err) {
+                                    debugPrint(
+                                        'house_recipes insert failed: $err');
+                                    final snackBar = SnackBar(
+                                      content: Text(
+                                          'Could not add recipe: $err'),
+                                      duration: Duration(seconds: 4),
+                                      backgroundColor: Colors.redAccent,
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snackBar);
+                                  }
                                 }
                               }
                             },

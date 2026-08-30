@@ -38,7 +38,7 @@ class _seeAllRecentlyAddedState extends State<seeAllRecentlyAdded> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(135.0),
+        preferredSize: Size.fromHeight(165.0),
         child: AppBar(
           leading: Padding(
             padding: const EdgeInsets.all(10.0),
