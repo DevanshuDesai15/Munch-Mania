@@ -612,7 +612,8 @@ class _UserProfilePageState extends State<detailPage2> {
                             pageBuilder: (BuildContext context,
                                 Animation animation,
                                 Animation secondAnimation) {
-                              return Stack(
+                              return SafeArea(
+                                child: Stack(
                                 alignment: Alignment.topCenter,
                                 children: <Widget>[
                                 Center(
@@ -772,7 +773,7 @@ class _UserProfilePageState extends State<detailPage2> {
                                 ),
                               ),
                               ],
-                            );
+                            ));
                             });
                       }),
                 ],

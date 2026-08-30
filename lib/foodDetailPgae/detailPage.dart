@@ -711,7 +711,8 @@ class _detailPageState extends State<detailPage> {
                             pageBuilder: (BuildContext context,
                                 Animation animation,
                                 Animation secondAnimation) {
-                              return Stack(
+                              return SafeArea(
+                                child: Stack(
                                 alignment: Alignment.topCenter,
                                 children: <Widget>[
                                 Center(
@@ -869,7 +870,7 @@ class _detailPageState extends State<detailPage> {
                                 ),
                               ),
                               ],
-                            );
+                            ));
                             });
                       }),
                 ],
